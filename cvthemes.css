@@ -1,10 +1,140 @@
+.cv-control.minimal {
+	/*  */
+	background: #fff;
+	font: smaller 'Lucida Grande', sans-serif;
+	border: none;
+	font-family: 'Lucida Grande', sans-serif;
+}
+
+.cv-vertical.minimal {
+	min-width: 1em;
+}
+
+.cv-horizontal.minimal {
+	min-height: 1em;
+	margin-top: 10px;
+}
+.cv-horizontal.minimal .cv-range {
+	cursor: ew-resize;
+}
+
+.cv-vertical.minimal .cv-range {
+	cursor: ns-resize;
+}
+
+.cv-control.minimal > .cv-input, .cv-control.minimal > .cv-number {
+	background: #fff;
+	color: #000;
+}
+
+.cv-control.minimal > .cv-label {
+	color: #000;
+}
+
+.cv-control.minimal > .cv-meter {
+	background-color: #333;
+}
+
+.cv-control.minimal > .cv-handle {
+}
+
+.cv-control.minimal > .cv-range {
+}
+.cv-control.minimal > .cv-input:focus {
+}
+
+.cv-control.cv-vertical.minimal {
+	min-width: 3ex;
+}
+
+.cv-control.cv-vertical.minimal > .cv-label {
+	left: 50%;
+}
+
+.cv-control.cv-horizontal.minimal > .cv-label {
+	bottom: 50%;
+}
+
+
+.cv-control.cv-vertical.minimal > .cv-meter {
+	width: 50%;
+	left: 0;
+	border: 1px solid black;
+	background: transparent;	
+}
+
+.cv-control.cv-horizontal.minimal > .cv-meter {
+	height: 50%;
+	bottom: 0;
+	top: auto;
+	border: 1px solid black;
+	background: transparent;
+}
+
+.cv-control.cv-vertical.minimal > .cv-range {
+	border-color: #000;
+	border-style: solid;
+	border-width: 2px 0;
+	box-sizing: content-box;
+	-moz-box-sizing: border-box;
+}
+
+.cv-control.cv-horizontal.minimal > .cv-range {
+	border-color: #000;
+	border-style: solid;
+	border-width: 0 2px;
+	box-sizing: content-box;
+	-moz-box-sizing: border-box;
+}
+
+.cv-control.minimal > .cv-handle {
+	background: #000;
+	border: 1px solid #000;
+}
+
+.cv-control.cv-vertical.minimal > .cv-handle {
+	height: 1ex;
+	min-height: 1ex;
+	width: 50%;
+}
+
+.cv-control.cv-horizontal.minimal > .cv-handle {
+	width: 1ex;
+	min-width: 1ex;
+	height: 50%;
+	min-height: 50%;
+	bottom: 0;
+	top: auto;
+}
+
+.cv-control.cv-vertical.minimal > .cv-input, .cv-control.cv-vertical.minimal > .cv-number {
+	background: transparent;
+	padding: 0;
+	overflow: visible;
+	width: auto;
+	min-width: 100%;
+	max-width: 300%;
+}
+
+.cv-control.cv-horizontal.minimal > .cv-input, .cv-control.cv-horizontal.minimal > .cv-number {
+	background: transparent;
+	line-height: normal;
+}
+
+.cv-control.cv-vertical.minimal > .cv-number {
+	width: 300%;
+	user-select: none;
+}
+
+.cv-control.minimal > .cv-input:focus {
+	background: #fff;
+}
 
 .cv-control.datgui {
-	/*  */
 	background: #404040;
 	font: 11px 'Lucida Grande', sans-serif;
-	text-shadow: 0 -1px 0 #111111;;;
-	/* min-height: 27px; */
+	text-shadow: 0 -1px 0 #111111;
+	min-height: 27px;
 	border: 2px solid #303030;
 }
 
@@ -21,9 +151,20 @@
 
 .cv-vertical.datgui .cv-range {
 	cursor: ns-resize;
+	bottom: 27px;
 }
 
 .cv-control.datgui > .cv-input, .cv-control.datgui > .cv-number {
+	background: #303030;
+	color: #2fa1d6;
+	min-height: 27px;
+	line-height: 27px;
+	/* bottom: -2px; */
+	/* box-sizing: border-box; */
+	-moz-box-sizing: border-box;
+}
+
+.cv-control.cv-vertical.datgui > .cv-input, .cv-control.cv-vertical.datgui > .cv-number {
 	background: #303030;
 	color: #2fa1d6;
 	min-height: 27px;
@@ -45,6 +186,7 @@
 .cv-control.datgui > .cv-range {
 }
 .cv-control.datgui > .cv-input:focus {
+	box-shadow: 0px 1px 0 1px #404040;
 }
 
 .cv-control.flatui {	
@@ -61,31 +203,39 @@
 	max-height: 12px;
 	height: 12px;
 	
-	margin: 30px 30px 10px 10px;
+	margin: 30px 0px 10px 0px;
+	box-sizing: border-box;
 }
 
 .cv-vertical.flatui {
 	max-width: 12px;
 	width: 12px;
-	margin: 30px 4ex 50px 4ex;
+	/* margin: 0 1ex; */
+	background: transparent;
 }
 
 .cv-horizontal.flatui .cv-handle {
-    top: -3px;
 }
 
 .cv-vertical.flatui .cv-handle {
-    left: -3px;
+    top: 20px;
+}
+
+.cv-vertical.flatui .cv-meter {
+	top: 20px;
 }
 
 .cv-horizontal.flatui .cv-range {
 	cursor: ew-resize;
 	right: 0 !important;
+	/* background: #ebedef; */
 }
 
 .cv-vertical.flatui .cv-range {
 	cursor: pointer;
-	bottom: 0;
+	top: 20px;
+	bottom: 28px;
+	box-sizing: content-box;
 }
 
 .cv-control.cv-vertical.flatui .cv-label {
@@ -94,8 +244,15 @@
 	    -ms-transform: none;
 	     -o-transform: none;
 		    transform: none;
-	top: -20px;
-	left: -9px;
+	top: 0;
+	width: 4ex;
+	left: -2ex;
+	text-align: center;
+	padding: 0;
+	margin-left: 6px;
+	overflow: hidden;
+	min-width: 4ex;
+	border-radius: 6px;
 }
 
 .cv-control.flatui > .cv-label {
@@ -105,31 +262,64 @@
 }
 
 .cv-vertical.flatui > .cv-input, .cv-vertical.flatui > .cv-number {
-	bottom: -50px;
+	bottom: -4px;
 	right: auto;
-	left: -4ex;
-	min-width: 8ex;
-	max-width: 8ex;
-	width: 8ex;
+	left: -2ex;
+	min-width: 4ex;
+	max-width: 4ex;
+	width: 4ex;
+	text-align: center;
+	border: 2px solid rgba(0, 0, 0, 0);
+}
+
+.cv-vertical.flatui > .cv-range:after {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	content: ' ';
+	background-color: #ebedef;
+	z-index: -1;
+	border-radius: 37px;
 }
 
 .cv-horizontal.flatui > .cv-input, .cv-horizontal.flatui > .cv-number {
 	min-width: 8ex;
 	max-width: 8ex;
 	width: 8ex;
-	right: -12ex;
-	bottom: -2px;
+	right: 0;
+	bottom: auto;
+	top: -28px;
+}
+
+.cv-control.cv-horizontal.flatui > .cv-number {
+	border: 2px solid rgba(0, 0, 0, 0);
+	background: rgba(0, 0, 0, 0);
+}
+
+.cv-control.cv-horizontal.flatui > .cv-number {
+	border: 2px solid rgba(0, 0, 0, 0);
+	background: rgba(0, 0, 0, 0);
 }
 
 .cv-control.flatui > .cv-input:focus {
 	box-shadow: none;
-	border-color: #1abc9c;
+	border: 2px solid #1abc9c !important;
+	background: #fff !important;
 	max-width: 8ex;
+	width: 8ex;
+	min-width: 8ex;
+}
+
+.cv-control.cv-vertical.flatui > .cv-input:focus {
+	left: -4ex;
+}
+
+.cv-control.flatui > .cv-number {
+	background: rgba(0, 0, 0, 0);
 }
 
 .cv-control.flatui > .cv-input, .cv-control.flatui > .cv-number {
 	line-height: 18px;
-	border: 2px solid #BDC3C7;
 	color: #34495E;
 	padding: 4px 4px;
 	height: 18px;
@@ -137,6 +327,7 @@
 	width: auto;
 	-moz-box-sizing: content-box;
 	box-sizing: content-box;
+	cursor: pointer;
 }
 
 .cv-control.flatui > .cv-meter {
@@ -147,11 +338,10 @@
 .cv-control.flatui > .cv-handle {
     background-color: #16a085;
     border-radius: 50%;
-    height: 18px;
-    width: 18px;
+    height: 12px;
+    width: 12px;
+    box-shadow: 0 0 0px 3px #16A085;
 }
 
 .cv-control.flatui > .cv-range {
-}
-.cv-control.flatui > .cv-input:focus {
 }
