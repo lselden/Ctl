@@ -6,7 +6,12 @@
 <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
 <script type="text/javascript" src="cvslider.js"></script>
 <style>
-body { margin: 0; padding: 0; background: black; width: 100%; height: 100%;
+body, html {
+	font-familiy: 12pt Helvetica, Arial, sans-serif;	
+	margin: 0; padding: 0; 
+	width: 100%; 
+	height: 100%;
+		
 }
 #content {
 	background: white;
@@ -15,88 +20,168 @@ body { margin: 0; padding: 0; background: black; width: 100%; height: 100%;
 	max-height: 100%;
 	position: absolute;
 	left: 50%;
-	top: 53%;
+	top: 50%;
 	-webkit-transform: translate(-50%, -50%);
 	   -moz-transform: translate(-50%, -50%);
 	    -ms-transform: translate(-50%, -50%);
 	     -o-transform: translate(-50%, -50%);
 	        transform: translate(-50%, -50%);    
 	padding: 5em;
-		/*font-family: monospace;*/
-	font-size: 12pt;
 	overflow: visible;
 	margin: 1em;
+}
+
+fieldset {
+	border: 1px solid black;
+	border-radius: 2ex;
+	margin: 20px auto;
+}
+
+ul {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+
+
+ul li {
+	box-sizing: border-box;
+}
+
+ul.horizontal li {
+	width: 100%;
+	padding: 4px 2rem;	
+}
+
+ul.vertical li {
+	float: left;
+	height: 10rem;
+	margin: 1rem;
+}
+
+.vertical:after {
+	 visibility: hidden;
+	 display: block;
+	 font-size: 0;
+	 content: " ";
+	 clear: both;
+	 height: 0;
+}
+
+.vertical > li > .cv-control {
+	height: 100%;
 }
 </style>
 </head>
 <body>
 	<div id="content">
-		<input id="box1" class="cv-input" type="number" label='default' data-orient='vert' min=20 max=20000 step=1 warp="exp" value=0 />
-		<input id="box1" class="cv-input" theme="datgui" type="number" label="flat" data-orient='vert' min=20 max=20000 step=1 warp="exp" value=0 />
-		<input id="box1" class="cv-input" theme="flatui" type="number" label="flat" data-orient='vert' min=20 max=20000 step=1 warp="exp" value=0 />
-		<input id="box2" class="cv-input" label='default' type="number" data-orient='vert' min=-10 max=10 step=0.001 value=0 />
-		<input id="box2" class="cv-input" theme="datgui" latel="flat" type="number" data-orient='vert' min=-10 max=10 step=0.001 value=0 />
-		<input id="box2" class="cv-input" theme="flatui" latel="flat" type="number" data-orient='vert' min=-10 max=10 step=0.001 value=0 />
-		
-		<input label="hello" class="cv-input" type="number" data-orient='horiz' min=-10 max=10 step=1 value=0 />
-		<input label="hello" class="cv-input" type="number" data-orient='horiz' min=-10 max=10 step=1 value=0 />
-		<input class="cv-input" type="number" theme="flat" step=0.001 data-orient='horiz' min=-10 max=10 value=0 />
-		
-		<input class="cv-input" type="number" data-label="hello" step=0.001 data-orient='horiz' min=-10 max=10 value=0 />
-		<input class="cv-input" type="number" data-label="hello" step=0.01 data-orient='horiz' min=-10 max=10 value=0 />
-		<input class="cv-input" type="number" theme="datgui" data-label="hello" step=0.1 data-orient='horiz' min=-10 max=10 value=0 />
-		
-		<div id="c" style="width: 200px; height: 40px;"></div>
-		<div id="d" min=20 max=20000 warp='exp' theme="flatui" label='freq'></div>
-	</div>
-	<script>
-	
-	var sliders = [];
-	
-	var nodes = document.querySelectorAll('.cv-input');
-	for (var i=0, input; input = nodes[i]; i++) {
-		var isVertical = (input.getAttribute('data-orient') == 'vert');
-		
-		var slide = new CVSlider(input, {
-			direction: isVertical ? 'vertical' : 'horizontal',
+		<fieldset>
+			<legend>Horizontal Sliders</legend>
+			<ul class="horizontal">
+				<li><input type="range" width="100%" label="default" theme="cv-default" /></li>
+				<li><input type="range" width="100%" label="minimal" theme="minimal" /></li>
+				<li><input type="range" width="100%" label="flatui" theme="flatui" /></li>
+				<li><input type="range" width="100%" label="datgui" theme="datgui" /></li>
+			</ul>
 			
-			label: input.getAttribute('data-label')
-		});
-		
-		slide.el.style.display = 'inline-block';
-		
-		sliders.push(slide);
-	}
-	
-	x = new CVSlider();
-	y = new CVSlider(document.querySelector('#c'), { label: 'style', value: 0.25});
-	z = new CVSlider(document.querySelector('#d'));
-	
-	e = sliders[0];
-	
-	/*
-window.h = document.querySelector('#box1'); window.v = document.querySelector('#box2');
-// TODO warp doens't seem to be taking quite right'
-window.e = new EzSlider(h, {
-	height: '30px', label: 'horiz', direction: 'horizontal', step: 0, warp: 'exp', maxPrecision: 3 });
-window.f = new EzSlider(v, {height: '20ex', width: '3ex', label: 'control freq', direction: 'vertical', step: 1, maxPrecision: 0, numCharacters: 3 });
-//window.e = new EzSlider(h, {label: 'horiz', direction: 'horizontal', step: 0, warp: 'exp', maxPrecision: 3, numCharacters: 12});
-//window.f = new EzSlider(v, {label: 'control freq', direction: 'vertical', step: 1, maxPrecision: 0, numCharacters: 3 });
-console.log(e);
-e.value = 10;
-e.active = true;
-var foo = function() {
-	if(e.active) {
-		e.normal = (e.normal + 0.01) % 1;
-		f.normal = (f.normal + 0.01) % 1;
-		//if(Math.random() > 0.5) e.active = false;
-	}
-		setTimeout(foo, 100);
-};
+		</fieldset>
+			
+		<fieldset>
+			<legend>Vertical Sliders</legend>
+			<ul class="vertical">
+				<li><input type="range" direction="vertical" label="default" theme="cv-default" value=0.3 step=0.1 spec="unipolar" /></li>
+				<li><input type="range" width="80px" direction="vertical" label="wider" theme="cv-default" spec="bipolar" /></li>
+				<li><input type="range" direction="vertical" label="warp linear" theme="datgui" value="5" min="1" max="10" step="1" warp="lin" /></li>
+				<li><input type="range" direction="vertical" label="warp exponential" theme="datgui" value="5" min="1" max="10" step="1" warp="exp" /></li>
+				<li><input type="range" width="4ex" direction="vertical" label="amp" theme="minimal" spec="amp" /></li>
+				<li><input type="range" direction="vertical" label="try alt+mousewheel" theme="minimal" spec="integer" /></li>
+				<li><input type="range" direction="vertical" label="freq" theme="flatui" spec="freq" /></li>
+				<li><input type="range" direction="vertical" label="midi" theme="flatui" spec="midi" /></li>
+			</ul>
+		</fieldset>
+		<fieldset>
+			<legend>Events</legend>
+			<div>
+				<div id="midi" style="block; width: 50%;"></div> #
+				<div id="freq" style="block; width: 50%;"></div> Hz
+			</div>
+			
+			<div id="normal">Normal: </div>
+			<button id="button">Randomize</button>
+			
+		</fieldset>
+		<script>
+			/** take all inputs defined above and convert them to CVSliders.  options will automatically be populated from element attributes **/
+			
+			var sliders = [];
+			
+			// selecting non-cv-input inputs, to avoid iterating over already-created sliders
+			var nodes = document.querySelectorAll('input[type=range], input[type=number]:not(.cv-input)');
+			for (var i=0, input; input = nodes[i]; i++) {
+				
+				var slide = new CVSlider(input);
+				
+				//slide.el.style.display = 'inline-block';
+				
+				sliders.push(slide);
+			}
+			
+			
+			/*** create sliders from "Events" elements, and link them together ***/
+			
+			// initialize sliders from options
+			var midi = new CVSlider(document.getElementById('midi'), {
+				spec: 'midinote',
+				theme: 'minimal',
+				label: 'midi note',
+				height: '30px',
+				numCharacters: 8 // width of number box
+			});
+			
+			var freq = new CVSlider(document.getElementById('freq'), {
+				min: Math.pow(2, (0-69)/12)*440, // 0 = C0 
+				max: Math.pow(2, (127-69)/12)*440, // 127 = G10
+				step: 0,
+				warp: 'exp',
+				theme: 'minimal',
+				label: 'frequency',
+				height: '30px',
+				maxPrecision: 2,
+				numCharacters: 8 // width of number box
+				
+			});
+			
+			var output = document.getElementById('normal');
+			var button = document.getElementById('button');
+			
+			// method one -- bind to input element dom events
+			midi.input.addEventListener('change', function () {
+				// automatically updates (magic of ECMA5 getters/setters)
+				freq.normal = midi.normal;
+				output.textContent = "Normal = " + midi.normal;
+			});
+			
+			// method two -- use bind/unbind to add callback on change
+			freq.bind(function (value, normal) {
+				// maps properly because normal is in 0 - 1 range
+				midi.normal = freq.normal;
+				output.textContent = "Normal = " + midi.normal;
+				
+			});
+			
+			// change value for automatic updates
+			document.getElementById('button').addEventListener('click', function () {
+				// note that when value is set it automatically rounds
+				midi.value = Math.random() * 127;
+			});
 
-document.body.addEventListener('click', function() { e.active = !e.active; });
-
-//foo();
-*/
-	</script>
+		</script>
+	</div>
 </body>
+
+
+
+
+
+
+
