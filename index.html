@@ -1,0 +1,102 @@
+<!DOCTYPE html lang="en">
+<html>
+<head>
+<link rel="stylesheet" href="cvslider.css" />
+<link rel="stylesheet" href="cvthemes.css" />
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+<script type="text/javascript" src="cvslider.js"></script>
+<style>
+body { margin: 0; padding: 0; background: black; width: 100%; height: 100%;
+}
+#content {
+	background: white;
+	width: 640px;
+	max-width: 100%;
+	max-height: 100%;
+	position: absolute;
+	left: 50%;
+	top: 53%;
+	-webkit-transform: translate(-50%, -50%);
+	   -moz-transform: translate(-50%, -50%);
+	    -ms-transform: translate(-50%, -50%);
+	     -o-transform: translate(-50%, -50%);
+	        transform: translate(-50%, -50%);    
+	padding: 5em;
+		/*font-family: monospace;*/
+	font-size: 12pt;
+	overflow: visible;
+	margin: 1em;
+}
+</style>
+</head>
+<body>
+	<div id="content">
+		<input id="box1" class="cv-input" type="number" label='default' data-orient='vert' min=20 max=20000 step=1 warp="exp" value=0 />
+		<input id="box1" class="cv-input" theme="datgui" type="number" label="flat" data-orient='vert' min=20 max=20000 step=1 warp="exp" value=0 />
+		<input id="box1" class="cv-input" theme="flatui" type="number" label="flat" data-orient='vert' min=20 max=20000 step=1 warp="exp" value=0 />
+		<input id="box2" class="cv-input" label='default' type="number" data-orient='vert' min=-10 max=10 step=0.001 value=0 />
+		<input id="box2" class="cv-input" theme="datgui" latel="flat" type="number" data-orient='vert' min=-10 max=10 step=0.001 value=0 />
+		<input id="box2" class="cv-input" theme="flatui" latel="flat" type="number" data-orient='vert' min=-10 max=10 step=0.001 value=0 />
+		
+		<input label="hello" class="cv-input" type="number" data-orient='horiz' min=-10 max=10 step=1 value=0 />
+		<input label="hello" class="cv-input" type="number" data-orient='horiz' min=-10 max=10 step=1 value=0 />
+		<input class="cv-input" type="number" theme="flat" step=0.001 data-orient='horiz' min=-10 max=10 value=0 />
+		
+		<input class="cv-input" type="number" data-label="hello" step=0.001 data-orient='horiz' min=-10 max=10 value=0 />
+		<input class="cv-input" type="number" data-label="hello" step=0.01 data-orient='horiz' min=-10 max=10 value=0 />
+		<input class="cv-input" type="number" theme="datgui" data-label="hello" step=0.1 data-orient='horiz' min=-10 max=10 value=0 />
+		
+		<div id="c" style="width: 200px; height: 40px;"></div>
+		<div id="d" min=20 max=20000 warp='exp' theme="flatui" label='freq'></div>
+	</div>
+	<script>
+	
+	var sliders = [];
+	
+	var nodes = document.querySelectorAll('.cv-input');
+	for (var i=0, input; input = nodes[i]; i++) {
+		var isVertical = (input.getAttribute('data-orient') == 'vert');
+		
+		var slide = new CVSlider(input, {
+			direction: isVertical ? 'vertical' : 'horizontal',
+			
+			label: input.getAttribute('data-label')
+		});
+		
+		slide.el.style.display = 'inline-block';
+		
+		sliders.push(slide);
+	}
+	
+	x = new CVSlider();
+	y = new CVSlider(document.querySelector('#c'), { label: 'style', value: 0.25});
+	z = new CVSlider(document.querySelector('#d'));
+	
+	e = sliders[0];
+	
+	/*
+window.h = document.querySelector('#box1'); window.v = document.querySelector('#box2');
+// TODO warp doens't seem to be taking quite right'
+window.e = new EzSlider(h, {
+	height: '30px', label: 'horiz', direction: 'horizontal', step: 0, warp: 'exp', maxPrecision: 3 });
+window.f = new EzSlider(v, {height: '20ex', width: '3ex', label: 'control freq', direction: 'vertical', step: 1, maxPrecision: 0, numCharacters: 3 });
+//window.e = new EzSlider(h, {label: 'horiz', direction: 'horizontal', step: 0, warp: 'exp', maxPrecision: 3, numCharacters: 12});
+//window.f = new EzSlider(v, {label: 'control freq', direction: 'vertical', step: 1, maxPrecision: 0, numCharacters: 3 });
+console.log(e);
+e.value = 10;
+e.active = true;
+var foo = function() {
+	if(e.active) {
+		e.normal = (e.normal + 0.01) % 1;
+		f.normal = (f.normal + 0.01) % 1;
+		//if(Math.random() > 0.5) e.active = false;
+	}
+		setTimeout(foo, 100);
+};
+
+document.body.addEventListener('click', function() { e.active = !e.active; });
+
+//foo();
+*/
+	</script>
+</body>

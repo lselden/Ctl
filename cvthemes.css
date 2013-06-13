@@ -1,0 +1,157 @@
+
+.cv-control.datgui {
+	/*  */
+	background: #404040;
+	font: 11px 'Lucida Grande', sans-serif;
+	text-shadow: 0 -1px 0 #111111;;;
+	/* min-height: 27px; */
+	border: 2px solid #303030;
+}
+
+.cv-vertical.datgui {
+	min-width: 27px;
+}
+
+.cv-horizontal.datgui {
+	min-height: 27px;
+}
+.cv-horizontal.datgui .cv-range {
+	cursor: ew-resize;
+}
+
+.cv-vertical.datgui .cv-range {
+	cursor: ns-resize;
+}
+
+.cv-control.datgui > .cv-input, .cv-control.datgui > .cv-number {
+	background: #303030;
+	color: #2fa1d6;
+	min-height: 27px;
+	line-height: 27px;
+}
+
+.cv-control.datgui > .cv-label {
+	color: #fff;
+}
+
+.cv-control.datgui > .cv-meter {
+	background-color: #2fa1d6;
+}
+
+.cv-control.datgui > .cv-handle {
+    display: none;
+}
+
+.cv-control.datgui > .cv-range {
+}
+.cv-control.datgui > .cv-input:focus {
+}
+
+.cv-control.flatui {	
+	/*  */
+	background: #ebedef;
+	font: 14px "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;;;
+	/* min-height: 27px; */
+	border: none;
+	border-radius: 32px;
+}
+
+.cv-horizontal.flatui {
+	min-height: 12px;
+	max-height: 12px;
+	height: 12px;
+	
+	margin: 30px 30px 10px 10px;
+}
+
+.cv-vertical.flatui {
+	max-width: 12px;
+	width: 12px;
+	margin: 30px 4ex 50px 4ex;
+}
+
+.cv-horizontal.flatui .cv-handle {
+    top: -3px;
+}
+
+.cv-vertical.flatui .cv-handle {
+    left: -3px;
+}
+
+.cv-horizontal.flatui .cv-range {
+	cursor: ew-resize;
+	right: 0 !important;
+}
+
+.cv-vertical.flatui .cv-range {
+	cursor: pointer;
+	bottom: 0;
+}
+
+.cv-control.cv-vertical.flatui .cv-label {
+	-webkit-transform: none;
+	   -moz-transform: none;
+	    -ms-transform: none;
+	     -o-transform: none;
+		    transform: none;
+	top: -20px;
+	left: -9px;
+}
+
+.cv-control.flatui > .cv-label {
+	color: #34495e;
+	top: -20px;
+	user-select: none;
+}
+
+.cv-vertical.flatui > .cv-input, .cv-vertical.flatui > .cv-number {
+	bottom: -50px;
+	right: auto;
+	left: -4ex;
+	min-width: 8ex;
+	max-width: 8ex;
+	width: 8ex;
+}
+
+.cv-horizontal.flatui > .cv-input, .cv-horizontal.flatui > .cv-number {
+	min-width: 8ex;
+	max-width: 8ex;
+	width: 8ex;
+	right: -12ex;
+	bottom: -2px;
+}
+
+.cv-control.flatui > .cv-input:focus {
+	box-shadow: none;
+	border-color: #1abc9c;
+	max-width: 8ex;
+}
+
+.cv-control.flatui > .cv-input, .cv-control.flatui > .cv-number {
+	line-height: 18px;
+	border: 2px solid #BDC3C7;
+	color: #34495E;
+	padding: 4px 4px;
+	height: 18px;
+	border-radius: 6px;
+	width: auto;
+	-moz-box-sizing: content-box;
+	box-sizing: content-box;
+}
+
+.cv-control.flatui > .cv-meter {
+	background-color: #1abc9c;
+	border-radius: 37px;
+}
+
+.cv-control.flatui > .cv-handle {
+    background-color: #16a085;
+    border-radius: 50%;
+    height: 18px;
+    width: 18px;
+}
+
+.cv-control.flatui > .cv-range {
+}
+.cv-control.flatui > .cv-input:focus {
+}

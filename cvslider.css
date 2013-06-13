@@ -1,0 +1,259 @@
+.cv-control.cv-default {
+	background: #444;
+	font-family: -webkit-small-control, sans-serif;
+	font-size: smaller;
+}
+
+.cv-horizontal.cv-default .cv-handle {
+	width: 3ex;
+}
+
+.cv-vertical.cv-default {
+	min-width: 3ex;
+	min-width: 1.5rem;
+}
+
+.cv-control.cv-default > .cv-input, .cv-control.cv-default > .cv-number {
+	background: #fff;
+}
+
+.cv-control.cv-default > .cv-label {
+	color: #fff;
+}
+
+.cv-control.cv-default > .cv-meter {
+	background-color: #0073ea;
+}
+
+.cv-control.cv-default > .cv-handle {
+	background: #ff0084;
+}
+
+.cv-control.cv-default > .cv-input:focus {
+}
+
+.cv-control {
+	position: relative;
+	margin: 0.5ex;
+	border: 1px solid black;
+	-moz-box-sizing: content-box;
+	box-sizing: content-box;
+	display: block;
+	background: rgba(0, 0, 0, 0.1)
+}
+
+.cv-vertical {
+	max-width: 4rem;
+	min-width: 8px;
+	min-height: 10rem;
+}
+
+.cv-vertical .cv-range {
+	bottom: 2.5ex;
+	width: 100%;
+	cursor: row-resize;
+}
+
+.cv-horizontal .cv-range {
+	right: 8ex;
+	height: 100%;
+	cursor: col-resize;
+}
+
+.cv-horizontal {
+	min-height: 1rem;
+	line-height: inherit;
+	min-width: 10rem;
+}
+
+.cv-vertical .cv-handle {
+	width: 100%;
+	/* height: 2ex; */
+}
+
+.cv-vertical .cv-meter {
+	width: 100%;
+	height: 0;
+}
+
+.cv-control.cv-vertical .cv-label {
+  -webkit-transform: rotate(90deg);
+  -moz-transform: translate(2ex, 0) rotate(90deg);
+  -ms-transform: translate(2ex, 0) rotate(90deg);
+  -o-transform: translate(2ex, 0) rotate(90deg);
+  transform: translate(2ex, 0) rotate(90deg);
+
+  /* also accepts left, right, top, bottom coordinates; not required, but a good idea for styling */
+  
+ 
+  -webkit-transform-origin: 1ex 1ex;
+  -moz-transform-origin: 0 0;
+  -ms-transform-origin: 0 0;
+  -o-transform-origin: 0 0;
+  transform-origin: 0 0;
+	
+
+  white-space: nowrap;
+  top: 0.5em;
+}
+
+.cv-horizontal .cv-meter {
+	height: 100%;
+}
+
+.cv-horizontal .cv-handle {
+	height: 100%;
+}
+
+.cv-control > .cv-range, .cv-control > .cv-number, .cv-control > .cv-label {
+	margin: 0;
+	border: none;
+	background: transparent;
+	-webkit-user-select: none;
+	user-select: none;
+	-moz-box-sizing: border-box;
+		 
+	box-sizing: border-box;
+	font-family: inherit;
+	font-size: inherit;
+}
+
+.cv-control > .cv-label {
+	margin-left: 0.5ex;
+	min-width: 8ex;
+	background: transparent;
+	vertical-align: middle;
+	position: absolute;
+	/* top: 0; */
+	left: 0;
+	line-height: inherit;
+}
+
+.cv-control > .cv-meter {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: #ccc;
+}
+
+.cv-control > .cv-range {
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+
+.cv-control > .cv-handle {
+	position: absolute;
+	top: 0;
+	left: 0;
+	min-width: 0.5rem;
+	background: #000;
+	min-height: 0.5rem;
+}
+
+.cv-control > .cv-number {
+	white-space: nowrap;
+	background: #fff;
+}
+
+.cv-control > .cv-input {
+	-webkit-appearance: none;
+	   -moz-appearance: none;
+		  -ms-appearance: none;
+	     -o-appearance: none;
+		      appearance: none;
+	opacity: 0;
+	margin: 0;
+	font-family: inherit;
+	font-size: inherit;
+	box-sizing: content-box;
+	width: 100%;
+	border: none;
+}
+
+.cv-control > .cv-input::-webkit-inner-spin-button,
+.cv-control > .cv-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+noindex:-o-prefocus,
+.cv-control > .cv-input {
+    margin-right: -2ex;
+}
+
+.cv-control > .cv-input:focus {
+	opacity: 1;
+	outline: none;
+	-moz-box-sizing: content-box;
+	max-width: 300%;
+	box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.4);
+}
+
+.cv-control > .cv-input:not(:focus) {
+	max-width: 100%;
+}
+
+.cv-horizontal .cv-number, .cv-horizontal .cv-input  {
+	height: 100%;
+	max-width: 100%;
+	right: 0;
+	box-sizing: content-box;
+}
+
+.cv-vertical > .cv-number, .cv-vertical > .cv-input {
+    min-width: 100%;
+		
+    height: 1rem;
+    right: 0ex;
+}
+
+.cv-control > .cv-input, .cv-control > .cv-number, .cv-control > .cv-label {
+/*
+	-webkit-backface-visibility: visible !important;
+	*/
+}
+
+.cv-control > .cv-handle, .cv-control > .cv-meter, .cv-control > .cv-label {
+	-webkit-backface-visibility: hidden;
+	-webkit-transform-style: preserve-3d;
+}
+
+.cv-vertical > .cv-number {
+	width: 100%;
+	/* right: -50%; */
+	/* border: 1px solid; */
+	padding: 1px;
+	text-align: right;
+}
+
+.cv-control > .cv-input, .cv-control > .cv-number {
+	position: absolute;
+	bottom: 0;
+	min-height: 1rem;
+	text-align: right;
+	padding: 0 2px 0 0;
+	line-height: inherit;
+	vertical-align: middle;
+	overflow: hidden;
+}
+
+.cv-vertical > .cv-meter.negative {
+	border-top-left-radius: 0 !important;
+	border-top-right-radius: 0 !important;
+}
+
+.cv-vertical > .cv-meter.positive {
+	border-bottom-left-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+}
+
+.cv-horizontal > .cv-meter.negative {
+	border-top-right-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+}
+
+.cv-horizontal > .cv-meter.positive {
+	border-top-left-radius: 0 !important;
+	border-bottom-left-radius: 0 !important;
+}
