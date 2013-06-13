@@ -3,13 +3,15 @@ CVSlider
 
 slider + number UI Widget, CSS skinnable
 
-Check out a [live demo](http://lukeselden.com/projects/cvslider/index.html).
-
 CVSlider is a UI Widget that may be used as a drop-in polyfill for `<input type="range" />` and `<input type="number" />`.  It displays a vertical or horizontal range slider, a label, and a number box.
 
 It has no dependancies, and should work on any modern browser that supports CSS3 Transforms.  It also works on touch-enabled devices, though perhaps with degraded performance.
 
 It's imminently customizable via CSS -- I've included a couple of different 'themes' as a separate CSS file.
+
+### [Demo] (http://lukeselden.com/projects/cvslider/index.html)
+
+Check out a live demo [here](http://lukeselden.com/projects/cvslider/index.html).
 
 Usage
 ---------------------------------------		
