@@ -30,6 +30,7 @@
 }
 
 .cv-control.cv-default > .cv-input:focus {
+	box-sizing: border-box;
 }
 
 .cv-control {
