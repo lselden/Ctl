@@ -10,7 +10,7 @@ It has no dependancies, and should work on any modern browser that supports CSS3
 It's imminently customizable via CSS -- I've included a couple of different 'themes' as a separate CSS file.
 
 
-### [Demo] (http://lukeselden.com/projects/cvslider/index.html)
+### [Demo] (http://lukeselden.com/projects/ctl/index.html)
 
 Check out a live demo [here](http://lukeselden.com/projects/ctl/index.html).
 
@@ -35,14 +35,14 @@ Usage
 		
 If jQuery is included on the page then this class will add itself as a jQuery plugin:
 
-		$('input[type=range]').cvslider(options);
+		$('input[type=range]').ctl(options);
 		
 Options
 ---------------------------------------		
 		var slider = new Ctl(el, options);
 		
 > *el* is any DOM Element.
->> If it's a HTMLInputElement it will be wrapped with the Slider (it becomes `<input type="number" class="cv-input" />`, and is the number display)/
+>> If it's a HTMLInputElement it will be wrapped with the Ctl (it becomes `<input type="number" class="ctl-input" />`, and is the number display)/
 >> Otherwise it will become the slider.
 
 > *options* is an object with any of the following entries:
@@ -51,10 +51,10 @@ Options
 * max: Number - maximum value
 * step: Number - step increment
 * warp: 'lin' or 'exp' - linear scale ('lin') or exponential scale ('exp').
-* spec: String - a preset for the above values.  These are defined in CVScale.specs.
+* spec: String - a preset for the above values.  These are defined in Ctl.specs.
 * direction: 'vertical' or 'horizontal' (default 'horizontal')
 * theme: CSS className to be added to the slider.  Current options are 'electro', 'minimal', 'flat', 'dat'
-* label: String - Slider label
+* label: String - slider label
 * numCharacters: maximum number of characters to show in number box.  Default is to calculate based on range/step
 * maxPrecision: maximum precision of number display.  Note that this only affects the display, not the actual value (use 'step' to set the real precision)
 * width: CSS value or Number: set width of slider
