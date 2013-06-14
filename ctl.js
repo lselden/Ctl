@@ -8,7 +8,7 @@
 	} else if (typeof define === 'function' && define.amd) {
 			define(factory);
 	} else {
-			root.CVSlider = factory();
+			root.Ctl = factory();
 	}
 }(this, function () {
 
@@ -25,8 +25,8 @@
 	})();
 
 	/**
-	 * CVSlider is a cross (recent) browser slider that can be easily customized using CSS
-	 * usage: new CVSlider(input or div element, options)
+	 * Ctl is a cross (recent) browser slider that can be easily customized using CSS
+	 * usage: new Ctl(input or div element, options)
 	 * if specified el is a container then it is filled with the slider content
 	 * if specified el is an input element then it is wrapped with the slider
 	 * options may be:
@@ -37,18 +37,18 @@
 	 *		height: css height of container
 	 *		min, max, step, value: respective values to set slider range
 	 *		warp: 'lin' or 'exp': change range mapping function
-	 *		spec: preset for min,max,step,value,warp values.  See CVSlider.warps below
+	 *		spec: preset for min,max,step,value,warp values.  See Ctl.warps below
 	 *		maxPrecision: maximum number of digits after decimal point
 	 *		numCharacters: width of number display (default is to calculate from min/max/step values)
 	 *		theme: an extra css class to be added to slider
 	 * }
 	 * 
 	 */
-	var CVSlider = function (el, _options) {
+	var Ctl = function (el, _options) {
 		
-		if (!(this instanceof CVSlider)) {
+		if (!(this instanceof Ctl)) {
 			// assume that this is called without _options, called jQuery style, or just return new instance
-			return (this instanceof HTMLElement) ? new CVSlider(this, el) : new CVSlider(el, _options);
+			return (this instanceof HTMLElement) ? new Ctl(this, el) : new Ctl(el, _options);
 		}
 		
 		var self = this
@@ -56,8 +56,8 @@
 			, min = options.min
 			, max = options.max
 			, warp = options.warp || 'lin'
-			, map = CVSlider.warps[warp].map.bind(this)
-			, unmap = CVSlider.warps[warp].unmap.bind(this)
+			, map = Ctl.warps[warp].map.bind(this)
+			, unmap = Ctl.warps[warp].unmap.bind(this)
 			, step = options.step
 			, value = options.value
 			, normal = unmap(value);
@@ -97,10 +97,10 @@
 				enumerable: true, configurable: true,
 				get: function () { return warp; },
 				set: function (input) {
-					if (input in CVSlider.warps) {
+					if (input in Ctl.warps) {
 						warp = input;
-						map = CVSlider.warps[input].map.bind(self);
-						unmap = CVSlider.warps[input].unmap.bind(self);
+						map = Ctl.warps[input].map.bind(self);
+						unmap = Ctl.warps[input].unmap.bind(self);
 					}
 				}
 			},
@@ -204,7 +204,7 @@
 		return this;
 	}
 
-	CVSlider.prototype.update = function () {
+	Ctl.prototype.update = function () {
 		var self = this
 			, value = this.value
 			, listeners = this.listeners;
@@ -229,12 +229,12 @@
 	}
 	
 	// add a listener to when the value changes.  fn(value, normalizedValue)
-	CVSlider.prototype.bind = function (fn) {
+	Ctl.prototype.bind = function (fn) {
 		this.listeners.push(fn);
 	}
 
 	// remove listener
-	CVSlider.prototype.unbind = function (fn) {
+	Ctl.prototype.unbind = function (fn) {
 		var i = this.listeners.indexOf(fn);
 		if (i > -1) this.listeners.splice(i, 1);
 	}
@@ -243,8 +243,8 @@
 
 	/* ======== Protected Methods / Properties ========== */
 
-	CVSlider.defaultOptions = {
-		theme: 'cv-default',
+	Ctl.defaultOptions = {
+		theme: 'electro',
 		min: 0,
 		max: 1,
 		step: 0,
@@ -258,7 +258,7 @@
 
 
 	// protected allows monkey-patching, but doesn't need to be used outside of instance creation
-	CVSlider.eventHandlers = {
+	Ctl.eventHandlers = {
 		input: {
 			'change': function (event) {
 				if (event instanceof CustomEvent) {
@@ -367,14 +367,14 @@
 		}
 	};
 
-	CVSlider.eventHandlers.range['touchstart'] = CVSlider.eventHandlers.range['mousedown'];
-	CVSlider.eventHandlers.input['wheel'] = CVSlider.eventHandlers.input['mousewheel'];
-	CVSlider.eventHandlers.range['wheel'] = CVSlider.eventHandlers.input['mousewheel'];
-	CVSlider.eventHandlers.range['mousewheel'] = CVSlider.eventHandlers.input['mousewheel'];
+	Ctl.eventHandlers.range['touchstart'] = Ctl.eventHandlers.range['mousedown'];
+	Ctl.eventHandlers.input['wheel'] = Ctl.eventHandlers.input['mousewheel'];
+	Ctl.eventHandlers.range['wheel'] = Ctl.eventHandlers.input['mousewheel'];
+	Ctl.eventHandlers.range['mousewheel'] = Ctl.eventHandlers.input['mousewheel'];
 
 
 	// these are easing functions to map/unmap values to the 0-1 range
-	CVSlider.warps = {
+	Ctl.warps = {
 		lin: {
 			map: function (x) {
 				var min = this.min
@@ -450,7 +450,7 @@
 
 	// audio-centric presets for min/max values.  specify in options as 'spec'
 	// based off of SuperCollider3's ControlSpec
-	CVSlider.specs = {
+	Ctl.specs = {
 		unipolar: { min: 0, max: 1, warp: 'lin', step: 0, value: 0 },
 		bipolar: { min: -1, max: 1, value: 0},
 		
@@ -499,8 +499,8 @@
 			} else {
 				containerElement = el;
 				
-				if (el.children) {
-					console.warn('CVSlider: container not empty, removing contents');
+				if (el.children.length) {
+					console.warn('Ctl: container not empty, removing contents');
 					el.innerHTML = '';
 				}
 			}
@@ -527,10 +527,10 @@
 		
 		// allow setting min/max/step using preset "spec"
 		// TODO - a little messy - maybe run after aggregate?
-		if (elementAttributes && elementAttributes.spec) spec = CVSlider.specs[elementAttributes.spec];
-		if (_options instanceof Object && _options.spec) spec = CVSlider.specs[_options.spec];
+		if (elementAttributes && elementAttributes.spec) spec = Ctl.specs[elementAttributes.spec];
+		if (_options instanceof Object && _options.spec) spec = Ctl.specs[_options.spec];
 		// extend options with defaults and element attributes
-		options = [CVSlider.defaultOptions, spec, elementAttributes, _options].reduce(function(finalObj, obj) {
+		options = [Ctl.defaultOptions, spec, elementAttributes, _options].reduce(function(finalObj, obj) {
 			if (!(obj instanceof Object)) return finalObj;
 			Object.keys(obj).forEach(function(key) {
 				if (obj[key] != null)
@@ -542,10 +542,10 @@
 		options.input = inputElement;
 		options.container = containerElement;
 		
-		if (!(options.warp in CVSlider.warps)) {
-			throw new Error(options.warp + ' is not a valid warp value');
+		if (!(options.warp in Ctl.warps)) {
+			throw new Error('Ctl: ' + options.warp + ' is not a valid warp value');
 		} else if (options.warp == 'exp' && options.min <= 0) {
-			throw new Error('cannot use exponential warp with a minimum <= 0');
+			throw new Error('Ctl: cannot use exponential warp with a minimum <= 0');
 		}
 		
 		return options;
@@ -557,8 +557,8 @@
 			, container = options.container
 			, input = options.input
 			, theme = options.theme || ''
-			, cssPrefix = 'cv-'
-			, outerClass = 'control'
+			, cssPrefix = 'ctl-'
+			, outerClass = 'box'
 			, inputClass = 'input'
 			, innerClasses = ['meter','handle','label','range','number']
 			, numberWidth = (options.numCharacters + 3) + 'ex';
@@ -599,9 +599,9 @@
 		this.number.textContent = this.formatNumber(options.value);
 		
 		// add event listeners
-		Object.keys(CVSlider.eventHandlers).forEach(function (elementKey) {
+		Object.keys(Ctl.eventHandlers).forEach(function (elementKey) {
 			var element = self[elementKey]
-				, elementEvents = CVSlider.eventHandlers[elementKey];
+				, elementEvents = Ctl.eventHandlers[elementKey];
 			Object.keys(elementEvents).forEach(function (eventName) {
 				element.addEventListener(eventName, elementEvents[eventName].bind(self));
 			});
@@ -751,13 +751,13 @@
 	
 	// add jQuery support
 	if (typeof jQuery !== 'undefined') {
-		jQuery.fn.cvslider = function (options) {
+		jQuery.fn.ctl = function (options) {
 			// skip anything that's (probably) already been created
-			return this.not('.cv-slider, .cv-input').map(function () {
-				return new CVSlider(this, options);
+			return this.not('.ctl-box, .ctl-input').map(function () {
+				return new Ctl(this, options);
 			});
 		}
 	}
 
-	return CVSlider;
+	return Ctl;
 }));

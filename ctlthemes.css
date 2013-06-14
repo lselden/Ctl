@@ -1,4 +1,4 @@
-.cv-control.minimal {
+.ctl-box.minimal {
 	/*  */
 	background: #fff;
 	font: smaller 'Lucida Grande', sans-serif;
@@ -6,64 +6,64 @@
 	font-family: 'Lucida Grande', sans-serif;
 }
 
-.cv-vertical.minimal {
+.ctl-vertical.minimal {
 	min-width: 1em;
 }
 
-.cv-horizontal.minimal {
-	min-height: 1em;
+.ctl-horizontal.minimal {
 	margin-top: 10px;
 }
-.cv-horizontal.minimal .cv-range {
+.ctl-horizontal.minimal .ctl-range {
 	cursor: ew-resize;
 }
 
-.cv-vertical.minimal .cv-range {
+.ctl-vertical.minimal .ctl-range {
 	cursor: ns-resize;
 }
 
-.cv-control.minimal > .cv-input, .cv-control.minimal > .cv-number {
+.ctl-box.minimal > .ctl-input, .ctl-box.minimal > .ctl-number {
 	background: #fff;
 	color: #000;
 }
 
-.cv-control.minimal > .cv-label {
+.ctl-box.minimal > .ctl-label {
 	color: #000;
 }
 
-.cv-control.minimal > .cv-meter {
+.ctl-box.minimal > .ctl-meter {
 	background-color: #333;
 }
 
-.cv-control.minimal > .cv-handle {
+.ctl-box.minimal > .ctl-handle {
 }
 
-.cv-control.minimal > .cv-range {
+.ctl-box.minimal > .ctl-range {
 }
-.cv-control.minimal > .cv-input:focus {
+.ctl-box.minimal > .ctl-input:focus {
 }
 
-.cv-control.cv-vertical.minimal {
+.ctl-box.ctl-vertical.minimal {
 	min-width: 3ex;
 }
 
-.cv-control.cv-vertical.minimal > .cv-label {
+.ctl-box.ctl-vertical.minimal > .ctl-label {
 	left: 50%;
 }
 
-.cv-control.cv-horizontal.minimal > .cv-label {
+.ctl-box.ctl-horizontal.minimal > .ctl-label {
 	bottom: 50%;
+	line-height: 1em;
 }
 
 
-.cv-control.cv-vertical.minimal > .cv-meter {
+.ctl-box.ctl-vertical.minimal > .ctl-meter {
 	width: 50%;
 	left: 0;
 	border: 1px solid black;
 	background: transparent;	
 }
 
-.cv-control.cv-horizontal.minimal > .cv-meter {
+.ctl-box.ctl-horizontal.minimal > .ctl-meter {
 	height: 50%;
 	bottom: 0;
 	top: auto;
@@ -71,7 +71,7 @@
 	background: transparent;
 }
 
-.cv-control.cv-vertical.minimal > .cv-range {
+.ctl-box.ctl-vertical.minimal > .ctl-range {
 	border-color: #000;
 	border-style: solid;
 	border-width: 2px 0;
@@ -79,26 +79,27 @@
 	-moz-box-sizing: border-box;
 }
 
-.cv-control.cv-horizontal.minimal > .cv-range {
+.ctl-box.ctl-horizontal.minimal > .ctl-range {
 	border-color: #000;
 	border-style: solid;
 	border-width: 0 2px;
-	box-sizing: content-box;
+	box-sizing: border-box;
 	-moz-box-sizing: border-box;
+	top: auto;
 }
 
-.cv-control.minimal > .cv-handle {
+.ctl-box.minimal > .ctl-handle {
 	background: #000;
 	border: 1px solid #000;
 }
 
-.cv-control.cv-vertical.minimal > .cv-handle {
+.ctl-box.ctl-vertical.minimal > .ctl-handle {
 	height: 1ex;
 	min-height: 1ex;
 	width: 50%;
 }
 
-.cv-control.cv-horizontal.minimal > .cv-handle {
+.ctl-box.ctl-horizontal.minimal > .ctl-handle {
 	width: 1ex;
 	min-width: 1ex;
 	height: 50%;
@@ -107,7 +108,7 @@
 	top: auto;
 }
 
-.cv-control.cv-vertical.minimal > .cv-input, .cv-control.cv-vertical.minimal > .cv-number {
+.ctl-box.ctl-vertical.minimal > .ctl-input, .ctl-box.ctl-vertical.minimal > .ctl-number {
 	background: transparent;
 	padding: 0;
 	overflow: visible;
@@ -115,21 +116,22 @@
 	min-width: 100%;
 }
 
-.cv-control.cv-horizontal.minimal > .cv-input, .cv-control.cv-horizontal.minimal > .cv-number {
+.ctl-box.ctl-horizontal.minimal > .ctl-input, .ctl-box.ctl-horizontal.minimal > .ctl-number {
 	background: transparent;
-	line-height: normal;
+	line-height: inherit;
+	font-size: inherit;
 }
 
-.cv-control.cv-vertical.minimal > .cv-number {
+.ctl-box.ctl-vertical.minimal > .ctl-number {
 	max-width: 300%;
 	user-select: none;
 }
 
-.cv-control.minimal > .cv-input:focus {
+.ctl-box.minimal > .ctl-input:focus {
 	background: #fff;
 }
 
-.cv-control.datgui {
+.ctl-box.dat {
 	background: #404040;
 	font: 11px 'Lucida Grande', sans-serif;
 	text-shadow: 0 -1px 0 #111111;
@@ -137,23 +139,23 @@
 	border: 2px solid #303030;
 }
 
-.cv-vertical.datgui {
+.ctl-vertical.dat {
 	min-width: 27px;
 }
 
-.cv-horizontal.datgui {
+.ctl-horizontal.dat {
 	min-height: 27px;
 }
-.cv-horizontal.datgui .cv-range {
+.ctl-horizontal.dat .ctl-range {
 	cursor: ew-resize;
 }
 
-.cv-vertical.datgui .cv-range {
+.ctl-vertical.dat .ctl-range {
 	cursor: ns-resize;
 	bottom: 27px;
 }
 
-.cv-control.datgui > .cv-input, .cv-control.datgui > .cv-number {
+.ctl-box.dat > .ctl-input, .ctl-box.dat > .ctl-number {
 	background: #303030;
 	color: #2fa1d6;
 	min-height: 27px;
@@ -163,32 +165,32 @@
 	-moz-box-sizing: border-box;
 }
 
-.cv-control.cv-vertical.datgui > .cv-input, .cv-control.cv-vertical.datgui > .cv-number {
+.ctl-box.ctl-vertical.dat > .ctl-input, .ctl-box.ctl-vertical.dat > .ctl-number {
 	background: #303030;
 	color: #2fa1d6;
 	min-height: 27px;
 	line-height: 27px;
 }
 
-.cv-control.datgui > .cv-label {
+.ctl-box.dat > .ctl-label {
 	color: #fff;
 }
 
-.cv-control.datgui > .cv-meter {
+.ctl-box.dat > .ctl-meter {
 	background-color: #2fa1d6;
 }
 
-.cv-control.datgui > .cv-handle {
+.ctl-box.dat > .ctl-handle {
     display: none;
 }
 
-.cv-control.datgui > .cv-range {
+.ctl-box.dat > .ctl-range {
 }
-.cv-control.datgui > .cv-input:focus {
+.ctl-box.dat > .ctl-input:focus {
 	box-shadow: 0px 1px 0 1px #404040;
 }
 
-.cv-control.flatui {	
+.ctl-box.flat {	
 	/*  */
 	background: #ebedef;
 	font: 14px "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;;;
@@ -197,7 +199,7 @@
 	border-radius: 32px;
 }
 
-.cv-horizontal.flatui {
+.ctl-horizontal.flat {
 	min-height: 12px;
 	max-height: 12px;
 	height: 12px;
@@ -206,38 +208,38 @@
 	box-sizing: border-box;
 }
 
-.cv-vertical.flatui {
+.ctl-vertical.flat {
 	max-width: 12px;
 	width: 12px;
 	/* margin: 0 1ex; */
 	background: transparent;
 }
 
-.cv-horizontal.flatui .cv-handle {
+.ctl-horizontal.flat .ctl-handle {
 }
 
-.cv-vertical.flatui .cv-handle {
+.ctl-vertical.flat .ctl-handle {
     top: 20px;
 }
 
-.cv-vertical.flatui .cv-meter {
+.ctl-vertical.flat .ctl-meter {
 	top: 20px;
 }
 
-.cv-horizontal.flatui .cv-range {
+.ctl-horizontal.flat .ctl-range {
 	cursor: ew-resize;
 	right: 0 !important;
 	/* background: #ebedef; */
 }
 
-.cv-vertical.flatui .cv-range {
+.ctl-vertical.flat .ctl-range {
 	cursor: pointer;
 	top: 20px;
 	bottom: 28px;
 	box-sizing: content-box;
 }
 
-.cv-control.cv-vertical.flatui .cv-label {
+.ctl-box.ctl-vertical.flat .ctl-label {
 	-webkit-transform: none;
 	   -moz-transform: none;
 	    -ms-transform: none;
@@ -254,13 +256,13 @@
 	border-radius: 6px;
 }
 
-.cv-control.flatui > .cv-label {
+.ctl-box.flat > .ctl-label {
 	color: #34495e;
 	top: -20px;
 	user-select: none;
 }
 
-.cv-vertical.flatui > .cv-input, .cv-vertical.flatui > .cv-number {
+.ctl-vertical.flat > .ctl-input, .ctl-vertical.flat > .ctl-number {
 	bottom: -4px;
 	right: auto;
 	left: -2ex;
@@ -271,7 +273,7 @@
 	border: 2px solid rgba(0, 0, 0, 0);
 }
 
-.cv-vertical.flatui > .cv-range:after {
+.ctl-vertical.flat > .ctl-range:after {
 	position: absolute;
 	width: 100%;
 	height: 100%;
@@ -281,7 +283,7 @@
 	border-radius: 37px;
 }
 
-.cv-horizontal.flatui > .cv-input, .cv-horizontal.flatui > .cv-number {
+.ctl-horizontal.flat > .ctl-input, .ctl-horizontal.flat > .ctl-number {
 	min-width: 8ex;
 	max-width: 8ex;
 	width: 8ex;
@@ -290,17 +292,17 @@
 	top: -28px;
 }
 
-.cv-control.cv-horizontal.flatui > .cv-number {
+.ctl-box.ctl-horizontal.flat > .ctl-number {
 	border: 2px solid rgba(0, 0, 0, 0);
 	background: rgba(0, 0, 0, 0);
 }
 
-.cv-control.cv-horizontal.flatui > .cv-number {
+.ctl-box.ctl-horizontal.flat > .ctl-number {
 	border: 2px solid rgba(0, 0, 0, 0);
 	background: rgba(0, 0, 0, 0);
 }
 
-.cv-control.flatui > .cv-input:focus {
+.ctl-box.flat > .ctl-input:focus {
 	box-shadow: none;
 	border: 2px solid #1abc9c !important;
 	background: #fff !important;
@@ -309,15 +311,15 @@
 	min-width: 8ex;
 }
 
-.cv-control.cv-vertical.flatui > .cv-input:focus {
+.ctl-box.ctl-vertical.flat > .ctl-input:focus {
 	left: -4ex;
 }
 
-.cv-control.flatui > .cv-number {
+.ctl-box.flat > .ctl-number {
 	background: rgba(0, 0, 0, 0);
 }
 
-.cv-control.flatui > .cv-input, .cv-control.flatui > .cv-number {
+.ctl-box.flat > .ctl-input, .ctl-box.flat > .ctl-number {
 	line-height: 18px;
 	color: #34495E;
 	padding: 4px 4px;
@@ -329,12 +331,12 @@
 	cursor: pointer;
 }
 
-.cv-control.flatui > .cv-meter {
+.ctl-box.flat > .ctl-meter {
 	background-color: #1abc9c;
 	border-radius: 37px;
 }
 
-.cv-control.flatui > .cv-handle {
+.ctl-box.flat > .ctl-handle {
     background-color: #16a085;
     border-radius: 50%;
     height: 12px;
@@ -342,5 +344,22 @@
     box-shadow: 0 0 0px 3px #16A085;
 }
 
-.cv-control.flatui > .cv-range {
+.ctl-box.ctl-vertical.flat > .ctl-meter.negative {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+}
+
+.ctl-box.ctl-vertical.flat > .ctl-meter.positive {
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.ctl-box.ctl-horizontal.flat > .ctl-meter.negative {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.ctl-box.ctl-horizontal.flat > .ctl-meter.positive {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
 }

@@ -1,10 +1,9 @@
 <!DOCTYPE html lang="en">
 <html>
 <head>
-<link rel="stylesheet" href="cvslider.css" />
-<link rel="stylesheet" href="cvthemes.css" />
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-<script type="text/javascript" src="cvslider.js"></script>
+<link rel="stylesheet" href="ctl.css" />
+<link rel="stylesheet" href="ctlthemes.css" />
+<script type="text/javascript" src="ctl.js"></script>
 <style>
 body, html {
 	font: 12pt Helvetica, Arial, sans-serif;	
@@ -16,13 +15,12 @@ body, html {
 }
 #content {
 	background: #fff;
-	width: 32rem;
+	width: 34rem;
 	max-width: 100%;
 	padding: 1rem;
 	overflow: visible;
-	margin: 4rem auto;
+	margin: 0 auto;
 	box-shadow: 0 0 1rem 1rem #FFF;
-	border-radius: 1rem;
 }
 
 fieldset {
@@ -62,21 +60,21 @@ ul.vertical li {
 	 height: 0;
 }
 
-.vertical > li > .cv-control {
+.vertical > li > .ctl-box {
 	height: 100%;
 }
 </style>
 </head>
 <body>
 	<div id="content">
-		<h1>CV Slider</h1>
+		<h1>Ctl</h1>
 		<fieldset>
 			<legend>Horizontal Sliders</legend>
 			<ul class="horizontal">
-				<li><input type="range" width="100%" label="default" theme="cv-default" /></li>
-				<li><input type="range" width="100%" label="minimal" theme="minimal" /></li>
-				<li><input type="range" width="100%" label="flatui" theme="flatui" /></li>
-				<li><input type="range" width="100%" label="datgui" theme="datgui" /></li>
+				<li><input type="range" width="100%" max="1" label="electro" theme="electro" /></li>
+				<li><input type="range" width="100%" max="2" label="minimal" theme="minimal" /></li>
+				<li><input type="range" width="100%" max="3" label="flat" theme="flat" /></li>
+				<li><input type="range" width="100%" max="4" label="dat" theme="dat" /></li>
 			</ul>
 			
 		</fieldset>
@@ -84,40 +82,40 @@ ul.vertical li {
 		<fieldset>
 			<legend>Vertical Sliders</legend>
 			<ul class="vertical">
-				<li><input type="range" direction="vertical" label="default" theme="cv-default" value=0.3 step=0.1 spec="unipolar" /></li>
-				<li><input type="range" width="80px" direction="vertical" label="wider" theme="cv-default" spec="bipolar" /></li>
-				<li><input type="range" direction="vertical" label="warp linear" theme="datgui" value="5" min="1" max="10" step="1" warp="lin" /></li>
-				<li><input type="range" direction="vertical" label="warp exponential" theme="datgui" value="5" min="1" max="10" step="1" warp="exp" /></li>
+				<li><input type="range" direction="vertical" label="electro" theme="electro" value=0.3 step=0.1 spec="unipolar" /></li>
+				<li><input type="range" width="80px" direction="vertical" label="wider" theme="electro" spec="bipolar" /></li>
+				<li><input type="range" direction="vertical" label="warp linear" theme="dat" value="5" min="1" max="10" step="1" warp="lin" /></li>
+				<li><input type="range" direction="vertical" label="warp exponential" theme="dat" value="5" min="1" max="10" step="1" warp="exp" /></li>
 				<li><input type="range" width="4ex" direction="vertical" label="amp" theme="minimal" spec="amp" /></li>
 				<li><input type="range" direction="vertical" label="try alt+mousewheel" theme="minimal" spec="integer" /></li>
-				<li><input type="range" direction="vertical" label="rate" theme="flatui" spec="rate" value=1 /></li>
-				<li><input type="range" direction="vertical" label="midi" theme="flatui" spec="midi" value="36" /></li>
+				<li><input type="range" direction="vertical" label="rate" theme="flat" spec="rate" value=1 /></li>
+				<li><input type="range" direction="vertical" label="midi" theme="flat" spec="midi" value="36" /></li>
 			</ul>
 		</fieldset>
 		<fieldset>
 			<legend>Events</legend>
 			<div>
-				<div id="midi" style="block; width: 50%;"></div> #
-				<div id="freq" style="block; width: 50%;"></div> Hz
+				<div id="midi" style="display: block; width: 50%;"></div> #
+				<div id="freq" style="display: block; width: 50%;"></div> Hz
 			</div>
-			
+			<div id="test"></div>
 			<div id="normal">Normal: </div>
 			<button id="button">Randomize</button>
 			
 		</fieldset>
 		<p>See <a href="http://github.com/lselden/CVSlider">GitHub</a> for more information</p>
 		<script>
-			/** take all inputs defined above and convert them to CVSliders.  options will automatically be populated from element attributes **/
+			/** take all inputs defined above and convert them to Ctls.  options will automatically be populated from element attributes **/
 			
 			var sliders = [];
 			
 			// selecting non-cv-input inputs, to avoid iterating over already-created sliders
 			// IE 9 automatically converts inputs to type=text
 			//var nodes = document.querySelectorAll('input[type=range], input[type=number]:not(.cv-input)');
-			var nodes = document.querySelectorAll('input:not(.cv-input)');
+			var nodes = document.querySelectorAll('input:not(.ctl-input)');
 			for (var i=0, input; input = nodes[i]; i++) {
 				
-				var slide = new CVSlider(input);
+				var slide = new Ctl(input);
 				
 				//slide.el.style.display = 'inline-block';
 				
@@ -128,7 +126,7 @@ ul.vertical li {
 			/*** create sliders from "Events" elements, and link them together ***/
 			
 			// initialize sliders from options
-			var midi = new CVSlider(document.getElementById('midi'), {
+			var midi = new Ctl(document.getElementById('midi'), {
 				spec: 'midinote',
 				theme: 'minimal',
 				label: 'midi note',
@@ -136,7 +134,7 @@ ul.vertical li {
 				numCharacters: 8 // width of number box
 			});
 			
-			var freq = new CVSlider(document.getElementById('freq'), {
+			var freq = new Ctl(document.getElementById('freq'), {
 				min: Math.pow(2, (0-69)/12)*440, // 0 = C0 
 				max: Math.pow(2, (127-69)/12)*440, // 127 = G10
 				step: 0,
