@@ -12,7 +12,7 @@ It's imminently customizable via CSS -- I've included a couple of different 'the
 
 ### [Demo] (http://lukeselden.com/projects/cvslider/index.html)
 
-Check out a live demo [here](http://lukeselden.com/projects/cvslider/index.html).
+Check out a live demo [here](http://lukeselden.com/projects/ctl/index.html).
 
 Usage
 ---------------------------------------		
