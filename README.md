@@ -103,5 +103,8 @@ Changing values and event handling
 ##### Credits:
 This code is partly inspired by [SuperCollider3](https://github.com/supercollider/supercollider)'s EZSlider, and borrows it's name from Ron Kuivila's CV Quark.
 Spec presets are lifted from SC3's (ControlSpec)[https://github.com/supercollider/supercollider/blob/cfef1d3598425d25badf197f96b41b4c664c9849/SCClassLibrary/Common/GUI/ControlModel.sc]
+'flat' theme emulates (FlatUI)[http://designmodo.github.io/Flat-UI/]
+'dat' theme emulates (datgui)[https://code.google.com/p/dat-gui/]
 
+_2013 Luke Selden_
 Released under the [WTFPL license](http://www.wtfpl.net/)
