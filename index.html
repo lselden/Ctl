@@ -3,7 +3,7 @@
 <head>
 <link rel="stylesheet" href="cvslider.css" />
 <link rel="stylesheet" href="cvthemes.css" />
-<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script type="text/javascript" src="cvslider.js"></script>
 <style>
 body, html {
@@ -90,8 +90,8 @@ ul.vertical li {
 				<li><input type="range" direction="vertical" label="warp exponential" theme="datgui" value="5" min="1" max="10" step="1" warp="exp" /></li>
 				<li><input type="range" width="4ex" direction="vertical" label="amp" theme="minimal" spec="amp" /></li>
 				<li><input type="range" direction="vertical" label="try alt+mousewheel" theme="minimal" spec="integer" /></li>
-				<li><input type="range" direction="vertical" label="freq" theme="flatui" spec="freq" /></li>
-				<li><input type="range" direction="vertical" label="midi" theme="flatui" spec="midi" /></li>
+				<li><input type="range" direction="vertical" label="rate" theme="flatui" spec="rate" value=1 /></li>
+				<li><input type="range" direction="vertical" label="midi" theme="flatui" spec="midi" value="36" /></li>
 			</ul>
 		</fieldset>
 		<fieldset>
@@ -112,7 +112,9 @@ ul.vertical li {
 			var sliders = [];
 			
 			// selecting non-cv-input inputs, to avoid iterating over already-created sliders
-			var nodes = document.querySelectorAll('input[type=range], input[type=number]:not(.cv-input)');
+			// IE 9 automatically converts inputs to type=text
+			//var nodes = document.querySelectorAll('input[type=range], input[type=number]:not(.cv-input)');
+			var nodes = document.querySelectorAll('input:not(.cv-input)');
 			for (var i=0, input; input = nodes[i]; i++) {
 				
 				var slide = new CVSlider(input);

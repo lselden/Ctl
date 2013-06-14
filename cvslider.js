@@ -449,38 +449,39 @@
 	};
 
 	// audio-centric presets for min/max values.  specify in options as 'spec'
+	// based off of SuperCollider3's ControlSpec
 	CVSlider.specs = {
-		unipolar: { min: 0, max: 1, warp: 'lin', step: 0, initial: 0 },
-		bipolar: { min: -1, max: 1, initial: 0},
+		unipolar: { min: 0, max: 1, warp: 'lin', step: 0, value: 0 },
+		bipolar: { min: -1, max: 1, value: 0},
 		
-		bool: { min: 0, max: 1, warp: 'lin', step: 1, initial: 0},
-		rotate: { min: -180, max: 180, warp: 'lin', step: 1, initial: 0 },
+		bool: { min: 0, max: 1, warp: 'lin', step: 1, value: 0},
+		rotate: { min: -180, max: 180, warp: 'lin', step: 1, value: 0 },
 
-		freq: {min: 20, max: 20000, warp: 'exp', step: 0, initial: 440},
-		lofreq: {min: 0.1, max: 100, warp: 'exp', step: 0, initial: 6},
-		midfreq: {min: 25, max: 4200, warp: 'exp', step: 0, initial: 440},
-		widefreq: {min: 0.1, max: 20000, warp: 'exp', step: 0, initial: 440},
+		freq: {min: 20, max: 20000, warp: 'exp', step: 0, value: 440},
+		lofreq: {min: 0.1, max: 100, warp: 'exp', step: 0, value: 6},
+		midfreq: {min: 25, max: 4200, warp: 'exp', step: 0, value: 440},
+		widefreq: {min: 0.1, max: 20000, warp: 'exp', step: 0, value: 440},
 		phase: {min: 0, max: 360},
-		rq: {min: 0.001, max: 2, warp: 'exp', step: 0, initial: 0.707},
+		rq: {min: 0.001, max: 2, warp: 'exp', step: 0, value: 0.707},
 		
-		midi: {min: 0, max: 127, step: 1, initial: 64},
-		midinote: {min: 0, max: 127, step: 1, initial: 60},
-		midivelocity: {min: 1, max: 127, initial: 64},
+		midi: {min: 0, max: 127, step: 1, value: 64},
+		midinote: {min: 0, max: 127, step: 1, value: 60},
+		midivelocity: {min: 1, max: 127, value: 64},
 
-		amp: {min: 0, max: 1, warp: 'quadIn', step: 0, initial: 0},
-		boostcut: {min: -20, max: 20, initial: 0},
+		amp: {min: 0, max: 1, warp: 'quadIn', step: 0, value: 0},
+		boostcut: {min: -20, max: 20, value: 0},
 
-		pan: {min: -1, max: 1, initial: 0},
-		detune: {min: -20, max: 20, initial: 0},
-		rate: {min: 0.125, max: 8, warp: 'exp', step: 0, initial: 1},
+		pan: {min: -1, max: 1, value: 0},
+		detune: {min: -20, max: 20, value: 0},
+		rate: {min: 0.125, max: 8, warp: 'exp', step: 0, value: 1},
 		beats: {min: 0, max: 20},
-		delay: {min: 0.0001, max: 1, warp: 'exp', step: 0, initial: 0.3 },
+		delay: {min: 0.0001, max: 1, warp: 'exp', step: 0, value: 0.3 },
 		
 		// 8bit
-		//'8bit': {min: -255, max: 255, warp: 'lin', step: 1, initial 0 },
+		//'8bit': {min: -255, max: 255, warp: 'lin', step: 1, value 0 },
 		// 16bit values
-		integer: {min: -1024, max: 1024, warp: 'lin', step: 1, initial: 0 },
-		float: {min: -1024, max: 1024, warp: 'lin', step: 0, initial: 0 }
+		integer: {min: -1024, max: 1024, warp: 'lin', step: 1, value: 0 },
+		float: {min: -1024, max: 1024, warp: 'lin', step: 0, value: 0 }
 	};
 
 
@@ -497,6 +498,11 @@
 				inputElement.type = 'number';
 			} else {
 				containerElement = el;
+				
+				if (el.children) {
+					console.warn('CVSlider: container not empty, removing contents');
+					el.innerHTML = '';
+				}
 			}
 			
 			// create object from input element's attributes, converting numbers to floats
@@ -589,6 +595,7 @@
 		}
 		
 		this.label.textContent = options.label;
+		this.label.setAttribute('unselectable', 'on');
 		this.number.textContent = this.formatNumber(options.value);
 		
 		// add event listeners
@@ -739,6 +746,16 @@
 		} else {
 			meterOffset = rangeHeight - meterHeight;
 			this.meter.style[vendorTransform] = 'translate(0, ' + meterOffset.toFixed() + 'px)';
+		}
+	}
+	
+	// add jQuery support
+	if (typeof jQuery !== 'undefined') {
+		jQuery.fn.cvslider = function (options) {
+			// skip anything that's (probably) already been created
+			return this.not('.cv-slider, .cv-input').map(function () {
+				return new CVSlider(this, options);
+			});
 		}
 	}
 
