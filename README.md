@@ -94,3 +94,5 @@ Changing values and event handling
 		// or listen based on DOM change events:
 		// slider.input is the input element
 		slider.input.addEventListener('change', listenerFunction);
+
+Released under the [WTFPL license](http://www.wtfpl.net/)
