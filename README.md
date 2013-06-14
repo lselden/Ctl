@@ -9,6 +9,7 @@ It has no dependancies, and should work on any modern browser that supports CSS3
 
 It's imminently customizable via CSS -- I've included a couple of different 'themes' as a separate CSS file.
 
+
 ### [Demo] (http://lukeselden.com/projects/cvslider/index.html)
 
 Check out a live demo [here](http://lukeselden.com/projects/cvslider/index.html).
@@ -31,6 +32,10 @@ Usage
 		// create, add element later
 		var slider = new CVSlider({ min: 0, max: 360, step: 1, value: 90 });
 		document.body.appendChild(slider.el);
+		
+If jQuery is included on the page then this class will add itself as a jQuery plugin:
+
+		$('input[type=range]').cvslider(options);
 		
 Options
 ---------------------------------------		
@@ -94,5 +99,9 @@ Changing values and event handling
 		// or listen based on DOM change events:
 		// slider.input is the input element
 		slider.input.addEventListener('change', listenerFunction);
+
+##### Credits:
+This code is partly inspired by [SuperCollider3](https://github.com/supercollider/supercollider)'s EZSlider, and borrows it's name from Ron Kuivila's CV Quark.
+Spec presets are lifted from SC3's (ControlSpec)[https://github.com/supercollider/supercollider/blob/cfef1d3598425d25badf197f96b41b4c664c9849/SCClassLibrary/Common/GUI/ControlModel.sc]
 
 Released under the [WTFPL license](http://www.wtfpl.net/)
