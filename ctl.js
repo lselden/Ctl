@@ -1,28 +1,18 @@
 /*** cross browser **/
 
-
-// if the module has no dependencies, the above pattern can be simplified to
-(function (root, factory) {
-	if (typeof exports === 'object') {
-			module.exports = factory();
-	} else if (typeof define === 'function' && define.amd) {
-			define(factory);
-	} else {
-			root.Ctl = factory();
-	}
-}(this, function () {
-
-	'use strict'
+(function ( win, jQuery, module ) {
+	'use strict';
 
 	/* ========= polyfills ======== */
 	var requestAnimFrame = (function(){
-		return  (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame) ||
-						window.webkitRequestAnimationFrame ||
-						window.mozRequestAnimationFrame    ||
-						function( callback ){
-							window.setTimeout(callback, 1000 / 60);
-						};
-	})();
+			return  (typeof requestAnimationFrame !== 'undefined' && win.requestAnimationFrame) ||
+				win.webkitRequestAnimationFrame ||
+				win.mozRequestAnimationFrame    ||
+				function( callback ){
+					win.setTimeout(callback, 1000 / 60);
+				};
+			})(),
+		console = win.console || {log: function () {}, warn: function () {} };
 
 	/**
 	 * Ctl is a cross (recent) browser slider that can be easily customized using CSS
@@ -44,27 +34,29 @@
 	 * }
 	 * 
 	 */
-	var Ctl = function (el, _options) {
+	var Ctl = function ( el, _options ) {
 		
-		if (!(this instanceof Ctl)) {
-			// assume that this is called without _options, called jQuery style, or just return new instance
-			return (this instanceof HTMLElement) ? new Ctl(this, el) : new Ctl(el, _options);
+		if ( !(this instanceof Ctl) ) {
+			// if called jQuery style (this is DOM element) re-call using expected format
+			return (this.nodeType === 1) ? new Ctl(this, el) : new Ctl(el, _options);
 		}
 		
-		var self = this
-			, options = parseOptions(el, _options)
-			, min = options.min
-			, max = options.max
-			, warp = options.warp || 'lin'
-			, map = Ctl.warps[warp].map.bind(this)
-			, unmap = Ctl.warps[warp].unmap.bind(this)
-			, step = options.step
-			, value = options.value
-			, normal = unmap(value);
+		var self = this,
+			options = parseOptions(el, _options),
+			min = options.min,
+			max = options.max,
+			warp = options.warp || 'lin',
+			map = Ctl.warps[warp].map.bind(this),
+			unmap = Ctl.warps[warp].unmap.bind(this),
+			step = options.step,
+			value = options.value,
+			normal = unmap(value);
 		
-		if (options.maxPrecision == null) {
+		// initialize / check values
+		
+		if ( options.maxPrecision == null ) {
 			// gets the number of digits after the decimal of defined step
-			if (step) {
+			if ( step ) {
 				options.maxPrecision = (step.toString().match(/\..*/) || [''])[0].slice(1).length;
 			} else {
 				// if step = 0 then use default value (3)
@@ -72,50 +64,56 @@
 			}
 		}
 		
-		// input type="number" or "range" can't actually have zero step
-		if (!step) step = 1 / Math.pow(10, options.maxPrecision);
-		
-		this.isVertical = (options.direction === 'vertical');
-		
-		if (!options.numCharacters) {
+		if ( !options.numCharacters ) {
 			options.numCharacters = Math.min(options.max.toFixed().length, 2);
 			// leave room for decimal and following digits
-			if (options.maxPrecision)
+			if ( options.maxPrecision )
 				options.numCharacters += 1 + options.maxPrecision;
 			// leave room for negative sign
-			if (min < 0)
+			if ( min < 0 )
 				options.numCharacters += 1;
 		}
 		
-		// set up number display
+		// input type="number" or "range" can't actually have zero step
+		if ( !step ) step = 1 / Math.pow(10, options.maxPrecision);
+		
+		this.isVertical = (options.direction === 'vertical');
+		
+		// set up number display function (closure)
 		this.formatNumber = formatNumberMemoize(options.numCharacters, options.maxPrecision, !this.isVertical);
-
+		
+		// set up DOM, adds references to dom elements to this
 		createDOM.call(this, options);
 		
+		// ECMAScript5 define getters/setters that validate changes
 		Object.defineProperties(this, {
+			// warp is a string key that references available option in Ctl.warps, i.e. 'lin' or 'exp'
 			warp: {
 				enumerable: true, configurable: true,
 				get: function () { return warp; },
 				set: function (input) {
-					if (input in Ctl.warps) {
+					if ( input in Ctl.warps ) {
 						warp = input;
+						// bind this to instance
 						map = Ctl.warps[input].map.bind(self);
 						unmap = Ctl.warps[input].unmap.bind(self);
 					}
 				}
 			},
+			// normal is value mapped to 0..1 range
 			normal: {
 				enumerable: true, configurable: true,
 				get: function () { return normal; },
-				set: function (input) {
+				set: function ( input ) {
 					var old = normal;
 					
-					if (input.toString() === input) input = parseFloat(input, 10);
-					if (isNaN(input)) throw Error("invalid input");
+					if ( input.toString() === input ) input = parseFloat(input, 10);
+					if ( isNaN(input) ) throw new Error("invalid input");
 					
+					// new value is first mapped to value in order to round properly
 					input = Math.min(Math.max(0, input), 1);
 					value = map(input);
-					if (step) value = Math.round(value / step) * step;
+					if ( step ) value = Math.round(value / step) * step;
 					normal = unmap(value);
 					
 					if (old !== normal) {
@@ -123,22 +121,21 @@
 					}
 				}
 			},
+			// actual value in given min/max range
 			value: {
 				enumerable: true, configurable: true,
 				get: function () { return value; },
-				set: function (input) {
-					var old = value
-						, step = this.step;
+				set: function ( input ) {
+					var old = value;
 					
-					if (input.toString() === input) input = parseFloat(input, 10);
-					if (isNaN(input)) throw Error("invalid input");
+					if ( input.toString() === input ) input = parseFloat(input, 10);
+					if ( isNaN(input) ) throw new Error("invalid input");
 					
-					if (step) input = Math.round(input / step) * step;
-					
+					if ( step ) input = Math.round(input / step) * step;
 					value = Math.min(Math.max(this.min, input), this.max);
 					normal = unmap(value);
 					
-					if (old !== value) {
+					if ( old !== value ) {
 						self.update();
 					}
 				}
@@ -146,10 +143,13 @@
 			min: {
 				enumerable: true, configurable: true,
 				get: function () { return min; },
-				set: function (input) {
-					if (input.toString() === input) input = parseFloat(input, 10);
-					if (isNaN(input)) throw Error("invalid minimum value");
-					if (input > max) {
+				set: function ( input ) {
+					if ( input.toString() === input ) input = parseFloat(input, 10);
+					if ( isNaN(input) ) throw new Error("invalid minimum value");
+					
+					// make sure that min < max - swap if necessary
+					// update DOM element as well
+					if ( input > max ) {
 						min = max;
 						max = input;
 						self.input.max = max;
@@ -159,16 +159,20 @@
 						self.input.min = min;	
 					}
 					
+					// calls the setter for 'normal', which recalculates based on new min
 					self.normal = unmap(self.value);
 				}
 			},
 			max: {
 				enumerable: true, configurable: true,
 				get: function () { return max; },
-				set: function (input) {
-					if (input.toString() === input) input = parseFloat(input, 10);
-					if (isNaN(input)) throw Error("invalid maximum value");
-					if (input < min) {
+				set: function ( input ) {
+					if ( input.toString() === input ) input = parseFloat(input, 10);
+					if ( isNaN(input) ) throw new Error("invalid maximum value");
+					
+					// make sure that min < max - swap if necessary
+					// update DOM element as well
+					if ( input < min ) {
 						max = min;
 						min = input;
 						self.input.min = min;
@@ -178,20 +182,29 @@
 						self.input.max = max;
 					}
 					
+					// calls the setter for 'normal', which recalculates based on new max
 					self.normal = unmap(self.value);
 				}
 			},
+			// step determines the precision/quantization of value
 			step: {
 				enumerable: true, configurable: true,
 				get: function () { return step; },
-				set: function (input) {
-					if (input.toString() === input) input = parseFloat(input, 10);
-					if (isNaN(input)) throw Error("invalid step value");
-					step = Math.max(Math.min(0, input), self.max - self.min);
+				set: function ( input ) {
+					if ( input.toString() === input ) input = parseFloat(input, 10);
+					if ( isNaN(input) ) throw new Error("invalid step value");
+					
+					// step can't be more than total range
+					step = Math.max(Math.min(0, input), max - min);
+					// update DOM
 					self.input.step = step;
+					
+					// calls the setter for 'value', which re-rounds value based on new step
 					self.value = map(self.normal);
 				}
 			},
+			// listeners hold subscribed callbacks to change events
+			// enumerable is false becuase it doesn't need to be visible
 			listeners: {
 				enumerable: false, configurable: true,
 				value: []
@@ -202,21 +215,26 @@
 		this.update();
 		
 		return this;
-	}
+	};
 
+	/**
+	 * on any change trigger UI update, DOM element value and notify any listeners
+	 *
+	 */
 	Ctl.prototype.update = function () {
-		var self = this
-			, value = this.value
-			, listeners = this.listeners;
-
-		if (this.input.value !== value) this.input.value = value;
+		var self = this,
+			value = this.value,
+			listeners = this.listeners;
+		
+		if ( this.input.value !== value ) this.input.value = value;
+		// defer UI updates for optimal performance
 		requestAnimFrame(function() {
 			self.number.textContent = self.formatNumber(value);
 			self.render();
 		});
 		
 		// run any event listeners
-		if (listeners.length) {
+		if ( listeners.length ) {
 			for (var i = 0, n = listeners.length; i < n; i++) {
 				listeners[i].call(this, value, this.normal);
 			}
@@ -226,20 +244,18 @@
 		dispatchEvent('change', this.input);
 		
 		
-	}
+	};
 	
 	// add a listener to when the value changes.  fn(value, normalizedValue)
-	Ctl.prototype.bind = function (fn) {
+	Ctl.prototype.bind = function ( fn ) {
 		this.listeners.push(fn);
-	}
+	};
 
 	// remove listener
-	Ctl.prototype.unbind = function (fn) {
+	Ctl.prototype.unbind = function ( fn ) {
 		var i = this.listeners.indexOf(fn);
 		if (i > -1) this.listeners.splice(i, 1);
-	}
-
-
+	};
 
 	/* ======== Protected Methods / Properties ========== */
 
@@ -253,50 +269,61 @@
 		direction: 'horizontal',
 		numCharacters: 0,
 		defaultPrecision: 3,
-		label: ''
-	}
+		label: '',
+		alt_key_step: 1 / 20, // amount to jump when alt key is pressed in increment handling
+		shift_key_step: 10 // jump 10X the step amount when shift pressed in increment handling
+	};
 
-
-	// protected allows monkey-patching, but doesn't need to be used outside of instance creation
+	// protected - allows monkey-patching, but doesn't need to be used outside of instance creation
 	Ctl.eventHandlers = {
 		input: {
-			'change': function (event) {
-				if (event instanceof CustomEvent) {
-					// changed programattically, ignore
+			// detect input change
+			'change': function ( event ) {
+				if ( event instanceof CustomEvent ) {
+					// changed programattically by Ctl, ignore
 				} else {
-					// rounds / clamps value and runs update if necessary
+					// rounds / clamps value and runs update if necessary (magic of Object setter/getters)
 					this.value = this.input.value;
 				}
 			},
-			'focus': function (event) {
+			// select number on focus for easy entering of new value
+			'focus': function ( ) {
 				this.input.setSelectionRange(0, 256);
 			},
-			'mousewheel': function (event) {
-				var delta = event.wheelDelta || -1*event.deltaY
-					, direction = (delta >= 0) ? 1 : -1
-					, step = this.step
-					, SHIFT_SCALE = 10
-					, ALT_STEP = 1 / 20;
+			// change value based on mousewheel.  Alt and Shift keys modify step increment
+			'mousewheel': function ( event ) {
+				var delta = event.wheelDelta || -1*event.deltaY,
+					direction = (delta >= 0) ? 1 : -1,
+					step = this.step,
+					SHIFT_SCALE = Ctl.defaultOptions.shift_key_step,
+					ALT_STEP = Ctl.defaultOptions.alt_key_step;
 					
 				event.preventDefault();
-				if (event.shiftKey) {
+				if ( event.shiftKey ) {
 					this.value += direction*step*SHIFT_SCALE;
-				} else if (event.altKey) {
+				} else if ( event.altKey ) {
 					this.normal += direction*ALT_STEP;
 				} else {
 					this.value += direction*step;
 				}
 			},
-			'keydown': function (event) {
-				var step = this.step
-					, SHIFT_SCALE = 10
-					, ALT_STEP = 1 / 20
-					, increment = (event.shiftKey) ? step*SHIFT_SCALE
-											: (event.altKey) ? (this.max - this.min)*ALT_STEP
-											: step
-					, value = this.value;
+			// allow stepping up/down using up,down,pageup and pagedown keys.
+			// Alt and Shift keys modify increment
+			'keydown': function ( event ) {
+				var step = this.step,
+					SHIFT_SCALE = Ctl.defaultOptions.shift_key_step,
+					ALT_STEP = Ctl.defaultOptions.alt_key_step,
+					increment;
+					
+				if ( event.shiftKey ) {
+					increment = step*SHIFT_SCALE;
+				} else if ( event.altKey ) {
+					increment = (this.max - this.min)*ALT_STEP;
+				} else {
+					increment = step;
+				}
 				
-				switch (event.which) {
+				switch ( event.which ) {
 					case 38: // up
 						this.value += increment;
 						event.preventDefault();
@@ -317,133 +344,145 @@
 			}
 		},
 		range: {
-			'mousedown': function (event) {
+			// update value with mouse.
+			// mousedown listener only applys to range, but once click temporarily adds
+			// move and up listeners to entire document, to avoid out-of-bounds issues
+			'mousedown': function ( event ) {
 				event.preventDefault();
 				
-				var self = this
-					, body = document.body
-					, downEvent = event
-					, range = this.range
-					, handle = this.handle
-					, bounds = range.getBoundingClientRect()
-					, marginX = handle.offsetWidth * 0.5
-					, marginY = handle.offsetHeight * 0.5;
+				var self = this,
+					body = document.body,
+					range = this.range,
+					handle = this.handle,
+					bounds = range.getBoundingClientRect(),
+					marginX = handle.offsetWidth * 0.5,
+					marginY = handle.offsetHeight * 0.5;
 				
-				var getPosition = function (evt) {
+				// calculate position based on mouse event
+				function getPosition ( evt ) {
 					if (evt.touches && evt.touches.length) {
 						evt = evt.touches[evt.touches.length - 1];
 					}
 					
-					var x = Math.min(Math.max(marginX, evt.clientX - bounds.left), bounds.width - marginX)
-						, y = Math.min(Math.max(marginY, evt.clientY - bounds.top), bounds.height - marginY);
+					var x = Math.min(Math.max(marginX, evt.clientX - bounds.left), bounds.width - marginX),
+						y = Math.min(Math.max(marginY, evt.clientY - bounds.top), bounds.height - marginY);
 					return [
 						(x - marginX) / (bounds.width - marginX*2),
 						(y - marginY) / (bounds.height - marginY*2)
 					];
 				}
 				
-				var move = function (evt) {
+				// mousemove handler
+				function move ( evt ) {
 					var position = getPosition(evt);
 					evt.preventDefault();
 					self.normal = (self.isVertical) ? (1.0 - position[1]) : position[0];
 				}
 				
-				var end = function (evt) {
+				// remove event listeners on mouseup
+				function end ( evt ) {
 					evt.preventDefault();
 					body.removeEventListener('mousemove', move);
 					body.removeEventListener('mouseup', end);
 					body.removeEventListener('touchmove', move);
 					body.removeEventListener('touchend', end);
 				}
-
+				
 				body.addEventListener('mousemove', move);
 				body.addEventListener('mouseup', end);
 				body.addEventListener('touchmove', move);
 				body.addEventListener('touchend', end);
 				
-				if ('activeElement' in document && document.activeElement != document.body) document.activeElement.blur();
+				// which clicked remove focus if number input is active
+				// IE makes body activeElement when no input is focused
+				if ( 'activeElement' in document && (document.activeElement != document.body) ) {
+					document.activeElement.blur();
+				}
 				
 			}
 		}
 	};
 
-	Ctl.eventHandlers.range['touchstart'] = Ctl.eventHandlers.range['mousedown'];
-	Ctl.eventHandlers.input['wheel'] = Ctl.eventHandlers.input['mousewheel'];
-	Ctl.eventHandlers.range['wheel'] = Ctl.eventHandlers.input['mousewheel'];
-	Ctl.eventHandlers.range['mousewheel'] = Ctl.eventHandlers.input['mousewheel'];
-
+	// duplicate events for mobile and firefox support
+	Ctl.eventHandlers.range.touchstart = Ctl.eventHandlers.range.mousedown;
+	Ctl.eventHandlers.input.wheel = Ctl.eventHandlers.input.mousewheel;
+	Ctl.eventHandlers.range.wheel = Ctl.eventHandlers.input.mousewheel;
+	Ctl.eventHandlers.range.mousewheel = Ctl.eventHandlers.input.mousewheel;
 
 	// these are easing functions to map/unmap values to the 0-1 range
 	Ctl.warps = {
 		lin: {
-			map: function (x) {
-				var min = this.min
-					, max = this.max;
+			map: function ( x ) {
+				var min = this.min,
+					max = this.max;
 				return (x <= 0) ? min 
-						 : (x >= 1) ? max
-						 : x * (max - min) + min;
+					 : (x >= 1) ? max
+					 : x * (max - min) + min;
 			},
-			unmap: function (x) {
-				var min = this.min
-					, max = this.max;
+			unmap: function ( x ) {
+				var min = this.min,
+					max = this.max;
 				return (x <= min) ? 0
-						 : (x >= max) ? 1
-						 : (x - min) / (max - min);
+					 : (x >= max) ? 1
+					 : (x - min) / (max - min);
 			}
 		},
 		exp: {
-			map: function (x) {
-				var min = this.min
-					, max = this.max
-					, logMin = Math.log(min)
-					, logMax = Math.log(max);
+			map: function ( x ) {
+				var min = this.min,
+					max = this.max,
+					logMin = Math.log(min),
+					logMax = Math.log(max);
 				return (x <= 0) ? min
-						 : (x >= 1) ? max
-						 : Math.exp(logMin + (logMax-logMin)*x);
+					 : (x >= 1) ? max
+					 : Math.exp(logMin + (logMax-logMin)*x);
 			},
-			unmap: function (x) {
-				var min = this.min
-					, max = this.max
-					, logMin = Math.log(min)
-					, logMax = Math.log(max);
+			unmap: function ( x ) {
+				var min = this.min,
+					max = this.max,
+					logMin = Math.log(min),
+					logMax = Math.log(max);
 				return (x <= min) ? 0
-						 : (x >= max) ? 1
-						 : (Math.log(x) - logMin)/(logMax - logMin);
+					 : (x >= max) ? 1
+					 : (Math.log(x) - logMin) / (logMax - logMin);
 			}
 		},
+		// experimental
+		// TODO -- should this be bipolar?
 		quadIn: {
-			map: function (x) {
-				var min = this.min
-					, max = this.max;
+			map: function ( x ) {
+				var min = this.min,
+					max = this.max;
 				return (x <= 0) ? min 
-						 : (x >= 1) ? max
-						 : (max-min) * x*x + min;
+					 : (x >= 1) ? max
+					 : (max-min) * x*x + min;
 			},
-			unmap: function (x) {
-				var min = this.min
-					, max = this.max
-					, sign = (x < 0) ? -1 : 1;
+			unmap: function ( x ) {
+				var min = this.min,
+					max = this.max;
 				return (x <= min) ? 0
-						 : (x >= max) ? 1
-						 : Math.sqrt(Math.abs(x - min) / (max - min));
+					 : (x >= max) ? 1
+					 : Math.sqrt(Math.abs(x - min) / (max - min));
 			}
 		},
+		// experimental
+		// TODO -- should this be bipolar?
 		quadOut: {
-			map: function (x) {
-				var min = this.min
-					, max = this.max
-					, onesubx = 1 - x;
+			map: function ( x ) {
+				var min = this.min,
+					max = this.max,
+					onesubx = 1 - x;
 				return (x <= 0) ? min 
-						 : (x >= 1) ? max
-						 : (max-min) * (1 - onesubx*onesubx) + min;
+					 : (x >= 1) ? max
+					 : (max-min) * (1 - onesubx*onesubx) + min;
 			},
-			unmap: function (x) {
-				var min = this.min
-					, max = this.max
-					, sign = ((min < 0) && (x < 0.5)) ? -1 : 1;
+			unmap: function ( x ) {
+				var min = this.min,
+					max = this.max;
+					//sign = ((min < 0) && (x < 0.5)) ? -1 : 1;
 				return (x <= min) ? 0
-						 : (x >= max) ? 1
-						 : 1 - Math.sqrt(Math.abs(max - x) / (max - min));
+					 : (x >= max) ? 1
+					 : 1 - Math.sqrt(Math.abs(max - x) / (max - min));
 			}
 		}
 	};
@@ -487,19 +526,26 @@
 
 	/* ======== Private Methods / Properties ========== */
 
-	// parse the input options, DOM attributes and include default options
-	function parseOptions(el, _options) {
+	/**
+	 * parse the input options, DOM attributes and include default options
+	 *
+	 * @param el (OPTIONAL) - DOM input or container element
+	 * @param _options (OPTIONAL) - extra configuration object
+	 * @returns options object
+	 */
+	function parseOptions ( el, _options ) {
 		var containerElement, inputElement, elementAttributes, options, spec;
 		
-		if (el instanceof HTMLElement) {
+		// bind to el if DOM element 
+		if ( !!(el && el.nodeType === 1) ) {
 		
-			if (el instanceof HTMLInputElement) {
+			if ( /INPUT/i.test(el.tagName) ) {
 				inputElement = el;
-				inputElement.type = 'number';
 			} else {
 				containerElement = el;
 				
-				if (el.children.length) {
+				if ( containerElement.children.length ) {
+					// TODO: not legacy-IE safe
 					console.warn('Ctl: container not empty, removing contents');
 					el.innerHTML = '';
 				}
@@ -509,209 +555,266 @@
 			// this allows us to pull in min, max, step attributes
 			// TODO type mutation
 			elementAttributes = Array.prototype.slice.apply(el.attributes);
-			elementAttributes = elementAttributes.reduce(function(obj, attr) {
-				var val = attr.value;;
+			elementAttributes = elementAttributes.reduce(function ( obj, attr ) {
+				var val = attr.value;
 				obj[attr.nodeName] = !isNaN(val) ? parseFloat(val, 10) : val.toString();
-				return obj; 
+				return obj;
 			}, {});
-			
-		} else if (_options == null) {
 		
+		} else if ( _options == null ) {
 			_options = el;
-			
 		}
 		
-		
-		containerElement || (containerElement = document.createElement('div'));
-		inputElement || (inputElement = document.createElement('input'));
-		
 		// allow setting min/max/step using preset "spec"
-		// TODO - a little messy - maybe run after aggregate?
-		if (elementAttributes && elementAttributes.spec) spec = Ctl.specs[elementAttributes.spec];
-		if (_options instanceof Object && _options.spec) spec = Ctl.specs[_options.spec];
+		if ( !!elementAttributes && elementAttributes.spec ) spec = Ctl.specs[elementAttributes.spec];
+		if ( !!_options && _options.spec ) spec = Ctl.specs[_options.spec];
+		
 		// extend options with defaults and element attributes
-		options = [Ctl.defaultOptions, spec, elementAttributes, _options].reduce(function(finalObj, obj) {
-			if (!(obj instanceof Object)) return finalObj;
-			Object.keys(obj).forEach(function(key) {
-				if (obj[key] != null)
-					finalObj[key] = obj[key];
-			});
-			return finalObj;
-		}, {});
+		options = [ Ctl.defaultOptions, spec, elementAttributes, _options]
+			.reduce(function ( finalObj, obj ) {
+				// skip null/empty
+				if ( typeof obj === 'object' ) {	
+					// copy each value into destination. overwrites defaults
+					Object.keys(obj).forEach(function ( key ) {
+						if ( obj[key] != null ) {
+							finalObj[key] = obj[key];
+						}
+					});
+				}
+				
+				return finalObj;
+				
+			}, {});
 		
-		options.input = inputElement;
-		options.container = containerElement;
+		// create main elements if not specified above
+		options.input = inputElement || document.createElement('input');
+		options.container = containerElement || document.createElement('div');
 		
-		if (!(options.warp in Ctl.warps)) {
+		// check for valid warp
+		// TODO - should this just warn, then set to linear?
+		if ( !(options.warp in Ctl.warps) ) {
 			throw new Error('Ctl: ' + options.warp + ' is not a valid warp value');
-		} else if (options.warp == 'exp' && options.min <= 0) {
+		} else if ( options.warp == 'exp' && options.min <= 0 ) {
 			throw new Error('Ctl: cannot use exponential warp with a minimum <= 0');
 		}
 		
 		return options;
 	}
 
-	// create dom elements, set attributes, add event handlers
-	function createDOM(options) {
-		var self = this
-			, container = options.container
-			, input = options.input
-			, theme = options.theme || ''
-			, cssPrefix = 'ctl-'
-			, outerClass = 'box'
-			, inputClass = 'input'
-			, innerClasses = ['meter','handle','label','range','number']
-			, numberWidth = (options.numCharacters + 3) + 'ex';
+	/**
+	 * create dom elements, set attributes, add event handlers
+	 * node: called by Ctl, so this references Ctl
+	 *
+	 * @param options (REQUIRED) settings created from parseoptions above
+	 */
+	// TODO: should these constants (cssPrefix, etc) be set at top of file?
+	function createDOM ( options ) {
+		var self = this,
+			container = options.container,
+			input = options.input,
+			theme = options.theme || '',
+			cssPrefix = 'ctl-',
+			outerClass = 'box',
+			inputClass = 'input',
+			innerClasses = ['meter','handle','label','range','number'],
+			directionClass = (this.isVertical ? 'vertical' : 'horizontal'),
+			numberWidth = (options.numCharacters + 3) + 'ex';
 			
-		this.input = input;
-		this.el = container;
 		
+		// set up container element
 		toggleClass(container, cssPrefix + outerClass, true);
-		toggleClass(container, cssPrefix + (this.isVertical ? 'vertical' : 'horizontal'), true);
+		toggleClass(container, cssPrefix + directionClass, true);
 		if (theme) toggleClass(container, theme, true);
 		
-		if (options.width) container.style.width = options.width + ((isNaN(options.width) ? '' : 'px'));
-		if (options.height) container.style.height = options.height + ((isNaN(options.width) ? '' : 'px'));
-			
+		// set dimensions, and default to px if no units already specified
+		// TODO use RegEx instead of isNaN ?
+		if ( options.width ) {
+			container.style.width = options.width + ((isNaN(options.width) ? '' : 'px'));
+		}
+		if ( options.height ) {
+			container.style.height = options.height + ((isNaN(options.width) ? '' : 'px'));
+		}
+		
+		this.el = container;
+		
+		// set up input
 		input.step = options.step;
 		input.min = options.min;
 		input.max = options.max;
 		input.value = options.value;
-		
+		// avoid rendering as type=range.
+		input.type = 'number';
 		toggleClass(input, cssPrefix + inputClass, true);
+		input.style.width = numberWidth;
 		
-		innerClasses.forEach(function (className) {
-			var div = document.createElement('div')
-				, handlers;
+		this.input = input;
+		
+		// set up display elements and add to container
+		innerClasses.forEach(function ( className ) {
+			var div = document.createElement('div');
 			toggleClass(div, cssPrefix + className, true);
 			container.appendChild(div);
 			self[className] = div;
 		});
 		
-		input.style.width = numberWidth;
-		if (!this.isVertical) {
-			this.number.style.width = numberWidth;
-			this.range.style.right = numberWidth;
-		}
+		this.number.textContent = this.formatNumber(options.value);
 		
 		this.label.textContent = options.label;
 		this.label.setAttribute('unselectable', 'on');
-		this.number.textContent = this.formatNumber(options.value);
 		
-		// add event listeners
-		Object.keys(Ctl.eventHandlers).forEach(function (elementKey) {
-			var element = self[elementKey]
-				, elementEvents = Ctl.eventHandlers[elementKey];
-			Object.keys(elementEvents).forEach(function (eventName) {
+		// add event listeners to elements.  see Ctl.eventHandlers
+		Object.keys(Ctl.eventHandlers).forEach(function ( elementKey ) {
+			var element = self[elementKey],
+				elementEvents = Ctl.eventHandlers[elementKey];
+			
+			// bind handler context to this (self)
+			Object.keys(elementEvents).forEach(function ( eventName ) {
 				element.addEventListener(eventName, elementEvents[eventName].bind(self));
 			});
 		});
 		
+		// horizontal / vertical considerations
+		
+		// set horizontal slider's number size based on specified number of digits
+		if ( !this.isVertical ) {
+			this.number.style.width = numberWidth;
+			this.range.style.right = numberWidth;
+		}
+		
+		// function for updating display depends on direction
 		this.render = (this.isVertical ? renderVertical : renderHorizontal).bind(this);
 		
 		// if input was passed in then wrap it with container
-		if (input.parentNode) {
-			input.parentNode.insertBefore(container, input);
+		if ( input.parentNode ) {
+			input.parentNode.replaceChild(container, input);
 		}
 		
 		container.appendChild(input);
 		
 		// bugfix to ensure proper text centering
-		if (!this.isVertical && container.clientHeight) {
+		// TODO is this necessary anymore?
+		if ( !this.isVertical && container.clientHeight ) {
 			container.style.lineHeight = container.clientHeight + 'px';
 		}
 		
 	}
 
 	// helper function to trigger a DOM event, even in IE
-	var dispatchEvent = (function() {
-		if (document.createEvent) {
-			return function (name, target) {
+	var dispatchEvent = (function () {
+		if ( document.createEvent ) {
+			return function ( name, target ) {
 				var event = document.createEvent('HTMLEvents');
+				
 				event.initEvent(name, true, true);
 				target.dispatchEvent(event);
-			}
+			};
 		} else {
-			return function (name, target) {
+			return function ( name, target ) {
 				target.fireEvent('on' + name);
-			}
+			};
 		}
 	})();
 	
-	
 	// helper function to toggle classes, since IE 9 doesn't support classList
-	var toggleClass = function (el, className, toggleOn) {
-		var str = el.className
-			, re = new RegExp('\\s+\\b' + className.toString() + '\\b');
+	function toggleClass ( el, className, toggleOn ) {
+		var str = el.className,
+			re = new RegExp('\\s+\\b' + className.toString() + '\\b');
 		
-		if (toggleOn && !re.test(str)) {
+		if ( toggleOn && !re.test(str) ) {
 			el.className = str + ' ' + className;
-		} else if (!toggleOn) {
+		} else if ( !toggleOn ) {
 			el.className = str.replace(re, '');
 		}
 	}
 
-	// create optimized function to properly align numbers
-	function formatNumberMemoize(_numCharacters, _maxPrecision, isFixedWidth) {	
-		var sp = (isFixedWidth) ? '\u2002' : ' ' // en-space (fixed-width) or regular space
-			, maxPrecision = (_maxPrecision != null) ? _maxPrecision : 3
-			, numCharacters = Math.max(_numCharacters || 8, 2)
-			, paddingString = '';
+	/**
+	 * create optimized formatting function to properly align numbers
+	 * closure determines constant values for function
+	 *
+	 * @param _numCharacters - number of characters available
+	 * @param _maxPrecision - maximum number of digits after decimal point
+	 * @param isFixedWidth - whether to allow whitespace to collapse
+	 * @returns function(value) - formats according to given settings
+	 */
+	function formatNumberMemoize ( _numCharacters, _maxPrecision, isFixedWidth ) {	
+		var maxPrecision = (_maxPrecision != null) ? _maxPrecision : 3,
+			numCharacters = Math.max(_numCharacters || 8, 2),
+			// en-space (fixed-width) or regular space
+			sp = (isFixedWidth) ? '\u2002' : ' ',
+			paddingString = '';
 		
 		// leave room for decimal point
-		if (maxPrecision) numCharacters -= 1;
-		// leave room for sign and (optionally) decimal point
-		//numCharacters -= (maxPrecision) ? 2 : 1;
+		if ( maxPrecision ) numCharacters -= 1;
 		
-		while (paddingString.length < numCharacters)
+		// create padding string of proper size
+		while ( paddingString.length < numCharacters )
 			paddingString += sp;
 		
-		return function (value) {
-			var sign = (value < 0) ? '-' : sp
-				, absVal = Math.abs(value)
-				, places = 0
-				, precision
-				, padding;
-			if (absVal < 1) {
+		// closure holds constant values for performance
+		return function ( value ) {
+			var sign = (value < 0) ? '-' : sp,
+				absVal = Math.abs(value),
+				places = 0,
+				precision;
+			
+			// ensure room for zero if less than 1
+			if ( absVal < 1 ) {
 				places = 1;
 			} else {
+				// find num digits before decimal point
 				while( absVal >= 1 ) {
 					absVal /= 10;
 					places += 1;
 				}
 			}
 			
+			// find available room for digits after decimal point
 			precision = Math.min( Math.max(numCharacters - places, 0), maxPrecision );
 			
-			return sign + paddingString.slice(places + precision) + Math.abs(value).toFixed(precision);
+			// sign, whitespace, number
+			return sign +
+				   paddingString.slice(places + precision) +
+				   Math.abs(value).toFixed(precision);
 		};
-	};
+	}
 
 	/* ==== UI rendering / update ==== */
+	
+	
+	// overwrite CSS transform property with vendor-specific name if necessary
 	var vendorTransform = 'transform';
-
-	// overwrite with vendor-specific style name if necessary
-	window.addEventListener('load', function () {
-		var vendorTransformNames = ['transform', 'WebkitTransform', 'MozTransform', 'msTransform', 'OTransform'];
-		vendorTransform = (vendorTransformNames.filter(function (vendorName) {
+	// can only detect after page load.
+	win.addEventListener('load', function () {
+		var vendorTransformNames = ['transform',
+									'WebkitTransform',
+									'MozTransform',
+									'msTransform',
+									'OTransform'];
+									
+		vendorTransform = (vendorTransformNames.filter(function ( vendorName ) {
 			return (vendorName in document.body.style);
-		}) || [])[0];
+		}) || ['transform'])[0];
 	});
 
-	function renderHorizontal() {
-		var normal = this.normal
-			, rangeWidth = this.range.clientWidth
-			, handleMargin = this.handle.clientWidth
-			, handlePosition = normal * (rangeWidth - handleMargin)
-			, centerOffset = (this.min < 0) ? 0.5 : 0
-			, meterWidth = (normal - centerOffset) * rangeWidth
-			, meterOffset;
+	/**
+	 * calculate position of meter and handle, and set CSS styles
+	 */
+	function renderHorizontal () {
+		var normal = this.normal,
+			rangeWidth = this.range.clientWidth,
+			handleMargin = this.handle.clientWidth,
+			handlePosition = normal * (rangeWidth - handleMargin),
+			centerOffset = (this.min < 0) ? 0.5 : 0,
+			meterWidth = (normal - centerOffset) * rangeWidth,
+			meterOffset;
 			
 		this.handle.style[vendorTransform] = 'translate(' + handlePosition.toFixed() + 'px, 0)';
 		this.meter.style.width = Math.abs(meterWidth).toFixed() + 'px';
 		
-		if (centerOffset) {
-			if ((normal > 0.5) != this.isPositive) {
+		// bipolar meters are anchored to center
+		if ( centerOffset ) {
+			// isPositive is used to change CSS class only when passing center
+			if ( (normal > 0.5) != this.isPositive ) {
 				this.isPositive = normal > 0.5;
 				toggleClass(this.meter, 'negative', !this.isPositive);
 				toggleClass(this.meter, 'positive', this.isPositive);
@@ -722,20 +825,22 @@
 		}
 	}
 
-	function renderVertical() {
-		var normal = this.normal
-			, rangeHeight = this.range.clientHeight
-			, handleMargin = this.handle.clientHeight
-			, handlePosition = (1.0 - normal) * (rangeHeight - handleMargin)
-			, centerOffset = (this.min < 0) ? 0.5 : 0
-			, meterHeight = (normal - centerOffset) * rangeHeight
-			, meterOffset;
+	function renderVertical () {
+		var normal = this.normal,
+			rangeHeight = this.range.clientHeight,
+			handleMargin = this.handle.clientHeight,
+			handlePosition = (1.0 - normal) * (rangeHeight - handleMargin),
+			centerOffset = (this.min < 0) ? 0.5 : 0,
+			meterHeight = (normal - centerOffset) * rangeHeight,
+			meterOffset;
 		
 		this.handle.style[vendorTransform] = 'translate(0, ' + handlePosition.toFixed() + 'px)';
 		this.meter.style.height = Math.abs(meterHeight).toFixed() + 'px';
 		
-		if (centerOffset) {
-			if ((normal > 0.5) !== this.isPositive) {
+		// bipolar meters are anchored to center
+		if ( centerOffset ) {
+			// isPositive is used to change CSS class only when passing center
+			if ( (normal > 0.5) !== this.isPositive ) {
 				this.isPositive = normal > 0.5;
 				toggleClass(this.meter, 'negative', !this.isPositive);
 				toggleClass(this.meter, 'positive', this.isPositive);
@@ -749,15 +854,26 @@
 		}
 	}
 	
+	/* ==== Export ==== */
+	
 	// add jQuery support
-	if (typeof jQuery !== 'undefined') {
-		jQuery.fn.ctl = function (options) {
+	if ( jQuery ) {
+		jQuery.fn.ctl = function ( options ) {
 			// skip anything that's (probably) already been created
+			// TODO - should css prefix / names be a global constant?
 			return this.not('.ctl-box, .ctl-input').map(function () {
 				return new Ctl(this, options);
 			});
-		}
+		};
 	}
-
-	return Ctl;
-}));
+	
+	if ( module ) {
+		module.exports = Ctl;
+	} else {
+		win.Ctl = Ctl;
+	}
+	
+})(this,									// window
+  (typeof jQuery == 'object') && jQuery,	// jQuery
+  (typeof module == 'object') && module		// CommonJS support
+);
