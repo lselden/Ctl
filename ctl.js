@@ -38,7 +38,7 @@
 		
 		if ( !(this instanceof Ctl) ) {
 			// if called jQuery style (this is DOM element) re-call using expected format
-			return (this.nodeType === 1) ? new Ctl(this, el) : new Ctl(el, _options);
+			return (this && this.nodeType === 1) ? new Ctl(this, el) : new Ctl(el, _options);
 		}
 		
 		var self = this,
@@ -257,273 +257,6 @@
 		if (i > -1) this.listeners.splice(i, 1);
 	};
 
-	/* ======== Protected Methods / Properties ========== */
-
-	Ctl.defaultOptions = {
-		theme: 'electro',
-		min: 0,
-		max: 1,
-		step: 0,
-		value: 0,
-		warp: 'lin',
-		direction: 'horizontal',
-		numCharacters: 0,
-		defaultPrecision: 3,
-		label: '',
-		alt_key_step: 1 / 20, // amount to jump when alt key is pressed in increment handling
-		shift_key_step: 10 // jump 10X the step amount when shift pressed in increment handling
-	};
-
-	// protected - allows monkey-patching, but doesn't need to be used outside of instance creation
-	Ctl.eventHandlers = {
-		input: {
-			// detect input change
-			'change': function ( event ) {
-				if ( event instanceof CustomEvent ) {
-					// changed programattically by Ctl, ignore
-				} else {
-					// rounds / clamps value and runs update if necessary (magic of Object setter/getters)
-					this.value = this.input.value;
-				}
-			},
-			// select number on focus for easy entering of new value
-			'focus': function ( ) {
-				this.input.setSelectionRange(0, 256);
-			},
-			// change value based on mousewheel.  Alt and Shift keys modify step increment
-			'mousewheel': function ( event ) {
-				var delta = event.wheelDelta || -1*event.deltaY,
-					direction = (delta >= 0) ? 1 : -1,
-					step = this.step,
-					SHIFT_SCALE = Ctl.defaultOptions.shift_key_step,
-					ALT_STEP = Ctl.defaultOptions.alt_key_step;
-					
-				event.preventDefault();
-				if ( event.shiftKey ) {
-					this.value += direction*step*SHIFT_SCALE;
-				} else if ( event.altKey ) {
-					this.normal += direction*ALT_STEP;
-				} else {
-					this.value += direction*step;
-				}
-			},
-			// allow stepping up/down using up,down,pageup and pagedown keys.
-			// Alt and Shift keys modify increment
-			'keydown': function ( event ) {
-				var step = this.step,
-					SHIFT_SCALE = Ctl.defaultOptions.shift_key_step,
-					ALT_STEP = Ctl.defaultOptions.alt_key_step,
-					increment;
-					
-				if ( event.shiftKey ) {
-					increment = step*SHIFT_SCALE;
-				} else if ( event.altKey ) {
-					increment = (this.max - this.min)*ALT_STEP;
-				} else {
-					increment = step;
-				}
-				
-				switch ( event.which ) {
-					case 38: // up
-						this.value += increment;
-						event.preventDefault();
-						break;
-					case 40: // down
-						this.value -= increment;
-						event.preventDefault();
-						break;
-					case 33: // page up
-						this.normal += ALT_STEP;
-						event.preventDefault();
-						break;
-					case 34: // page down
-						this.normal -= ALT_STEP;
-						event.preventDefault();
-						break;
-				}
-			}
-		},
-		range: {
-			// update value with mouse.
-			// mousedown listener only applys to range, but once click temporarily adds
-			// move and up listeners to entire document, to avoid out-of-bounds issues
-			'mousedown': function ( event ) {
-				event.preventDefault();
-				
-				var self = this,
-					body = document.body,
-					range = this.range,
-					handle = this.handle,
-					bounds = range.getBoundingClientRect(),
-					marginX = handle.offsetWidth * 0.5,
-					marginY = handle.offsetHeight * 0.5;
-				
-				// calculate position based on mouse event
-				function getPosition ( evt ) {
-					if (evt.touches && evt.touches.length) {
-						evt = evt.touches[evt.touches.length - 1];
-					}
-					
-					var x = Math.min(Math.max(marginX, evt.clientX - bounds.left), bounds.width - marginX),
-						y = Math.min(Math.max(marginY, evt.clientY - bounds.top), bounds.height - marginY);
-					return [
-						(x - marginX) / (bounds.width - marginX*2),
-						(y - marginY) / (bounds.height - marginY*2)
-					];
-				}
-				
-				// mousemove handler
-				function move ( evt ) {
-					var position = getPosition(evt);
-					evt.preventDefault();
-					self.normal = (self.isVertical) ? (1.0 - position[1]) : position[0];
-				}
-				
-				// remove event listeners on mouseup
-				function end ( evt ) {
-					evt.preventDefault();
-					body.removeEventListener('mousemove', move);
-					body.removeEventListener('mouseup', end);
-					body.removeEventListener('touchmove', move);
-					body.removeEventListener('touchend', end);
-				}
-				
-				body.addEventListener('mousemove', move);
-				body.addEventListener('mouseup', end);
-				body.addEventListener('touchmove', move);
-				body.addEventListener('touchend', end);
-				
-				// which clicked remove focus if number input is active
-				// IE makes body activeElement when no input is focused
-				if ( 'activeElement' in document && (document.activeElement != document.body) ) {
-					document.activeElement.blur();
-				}
-				
-			}
-		}
-	};
-
-	// duplicate events for mobile and firefox support
-	Ctl.eventHandlers.range.touchstart = Ctl.eventHandlers.range.mousedown;
-	Ctl.eventHandlers.input.wheel = Ctl.eventHandlers.input.mousewheel;
-	Ctl.eventHandlers.range.wheel = Ctl.eventHandlers.input.mousewheel;
-	Ctl.eventHandlers.range.mousewheel = Ctl.eventHandlers.input.mousewheel;
-
-	// these are easing functions to map/unmap values to the 0-1 range
-	Ctl.warps = {
-		lin: {
-			map: function ( x ) {
-				var min = this.min,
-					max = this.max;
-				return (x <= 0) ? min 
-					 : (x >= 1) ? max
-					 : x * (max - min) + min;
-			},
-			unmap: function ( x ) {
-				var min = this.min,
-					max = this.max;
-				return (x <= min) ? 0
-					 : (x >= max) ? 1
-					 : (x - min) / (max - min);
-			}
-		},
-		exp: {
-			map: function ( x ) {
-				var min = this.min,
-					max = this.max,
-					logMin = Math.log(min),
-					logMax = Math.log(max);
-				return (x <= 0) ? min
-					 : (x >= 1) ? max
-					 : Math.exp(logMin + (logMax-logMin)*x);
-			},
-			unmap: function ( x ) {
-				var min = this.min,
-					max = this.max,
-					logMin = Math.log(min),
-					logMax = Math.log(max);
-				return (x <= min) ? 0
-					 : (x >= max) ? 1
-					 : (Math.log(x) - logMin) / (logMax - logMin);
-			}
-		},
-		// experimental
-		// TODO -- should this be bipolar?
-		quadIn: {
-			map: function ( x ) {
-				var min = this.min,
-					max = this.max;
-				return (x <= 0) ? min 
-					 : (x >= 1) ? max
-					 : (max-min) * x*x + min;
-			},
-			unmap: function ( x ) {
-				var min = this.min,
-					max = this.max;
-				return (x <= min) ? 0
-					 : (x >= max) ? 1
-					 : Math.sqrt(Math.abs(x - min) / (max - min));
-			}
-		},
-		// experimental
-		// TODO -- should this be bipolar?
-		quadOut: {
-			map: function ( x ) {
-				var min = this.min,
-					max = this.max,
-					onesubx = 1 - x;
-				return (x <= 0) ? min 
-					 : (x >= 1) ? max
-					 : (max-min) * (1 - onesubx*onesubx) + min;
-			},
-			unmap: function ( x ) {
-				var min = this.min,
-					max = this.max;
-					//sign = ((min < 0) && (x < 0.5)) ? -1 : 1;
-				return (x <= min) ? 0
-					 : (x >= max) ? 1
-					 : 1 - Math.sqrt(Math.abs(max - x) / (max - min));
-			}
-		}
-	};
-
-	// audio-centric presets for min/max values.  specify in options as 'spec'
-	// based off of SuperCollider3's ControlSpec
-	Ctl.specs = {
-		unipolar: { min: 0, max: 1, warp: 'lin', step: 0, value: 0 },
-		bipolar: { min: -1, max: 1, value: 0},
-		
-		bool: { min: 0, max: 1, warp: 'lin', step: 1, value: 0},
-		rotate: { min: -180, max: 180, warp: 'lin', step: 1, value: 0 },
-
-		freq: {min: 20, max: 20000, warp: 'exp', step: 0, value: 440},
-		lofreq: {min: 0.1, max: 100, warp: 'exp', step: 0, value: 6},
-		midfreq: {min: 25, max: 4200, warp: 'exp', step: 0, value: 440},
-		widefreq: {min: 0.1, max: 20000, warp: 'exp', step: 0, value: 440},
-		phase: {min: 0, max: 360},
-		rq: {min: 0.001, max: 2, warp: 'exp', step: 0, value: 0.707},
-		
-		midi: {min: 0, max: 127, step: 1, value: 64},
-		midinote: {min: 0, max: 127, step: 1, value: 60},
-		midivelocity: {min: 1, max: 127, value: 64},
-
-		amp: {min: 0, max: 1, warp: 'quadIn', step: 0, value: 0},
-		boostcut: {min: -20, max: 20, value: 0},
-
-		pan: {min: -1, max: 1, value: 0},
-		detune: {min: -20, max: 20, value: 0},
-		rate: {min: 0.125, max: 8, warp: 'exp', step: 0, value: 1},
-		beats: {min: 0, max: 20},
-		delay: {min: 0.0001, max: 1, warp: 'exp', step: 0, value: 0.3 },
-		
-		// 8bit
-		//'8bit': {min: -255, max: 255, warp: 'lin', step: 1, value 0 },
-		// 16bit values
-		integer: {min: -1024, max: 1024, warp: 'lin', step: 1, value: 0 },
-		float: {min: -1024, max: 1024, warp: 'lin', step: 0, value: 0 }
-	};
-
-
 	/* ======== Private Methods / Properties ========== */
 
 	/**
@@ -553,13 +286,19 @@
 			
 			// create object from input element's attributes, converting numbers to floats
 			// this allows us to pull in min, max, step attributes
-			// TODO type mutation
 			elementAttributes = Array.prototype.slice.apply(el.attributes);
+			
+			// TODO type mutation Array -> Object
 			elementAttributes = elementAttributes.reduce(function ( obj, attr ) {
 				var val = attr.value;
 				obj[attr.nodeName] = !isNaN(val) ? parseFloat(val, 10) : val.toString();
 				return obj;
 			}, {});
+			
+			// value isn't counted as an attribute for some reason
+			if ( el.value && !isNaN(el.value) ) {
+				elementAttributes.value = parseFloat(el.value);
+			}
 		
 		} else if ( _options == null ) {
 			_options = el;
@@ -853,6 +592,272 @@
 			this.meter.style[vendorTransform] = 'translate(0, ' + meterOffset.toFixed() + 'px)';
 		}
 	}
+	
+	/* ======== Protected Methods / Properties ========== */
+
+	Ctl.defaultOptions = {
+		theme: 'electro',
+		min: 0,
+		max: 1,
+		step: 0,
+		value: 0,
+		warp: 'lin',
+		direction: 'horizontal',
+		numCharacters: 0,
+		defaultPrecision: 3,
+		label: '',
+		alt_key_step: 1 / 20, // amount to jump when alt key is pressed in increment handling
+		shift_key_step: 10 // jump 10X the step amount when shift pressed in increment handling
+	};
+
+	// protected - allows monkey-patching, but doesn't need to be used outside of instance creation
+	Ctl.eventHandlers = {
+		input: {
+			// detect input change
+			'change': function ( event ) {
+				if ( event instanceof CustomEvent ) {
+					// changed programattically by Ctl, ignore
+				} else {
+					// rounds / clamps value and runs update if necessary (magic of Object setter/getters)
+					this.value = this.input.value;
+				}
+			},
+			// select number on focus for easy entering of new value
+			'focus': function ( ) {
+				this.input.setSelectionRange(0, 256);
+			},
+			// change value based on mousewheel.  Alt and Shift keys modify step increment
+			'mousewheel': function ( event ) {
+				var delta = event.wheelDelta || -1*event.deltaY,
+					direction = (delta >= 0) ? 1 : -1,
+					step = this.step,
+					SHIFT_SCALE = Ctl.defaultOptions.shift_key_step,
+					ALT_STEP = Ctl.defaultOptions.alt_key_step;
+					
+				event.preventDefault();
+				if ( event.shiftKey ) {
+					this.value += direction*step*SHIFT_SCALE;
+				} else if ( event.altKey ) {
+					this.normal += direction*ALT_STEP;
+				} else {
+					this.value += direction*step;
+				}
+			},
+			// allow stepping up/down using up,down,pageup and pagedown keys.
+			// Alt and Shift keys modify increment
+			'keydown': function ( event ) {
+				var step = this.step,
+					SHIFT_SCALE = Ctl.defaultOptions.shift_key_step,
+					ALT_STEP = Ctl.defaultOptions.alt_key_step,
+					increment;
+					
+				if ( event.shiftKey ) {
+					increment = step*SHIFT_SCALE;
+				} else if ( event.altKey ) {
+					increment = (this.max - this.min)*ALT_STEP;
+				} else {
+					increment = step;
+				}
+				
+				switch ( event.which ) {
+					case 38: // up
+						this.value += increment;
+						event.preventDefault();
+						break;
+					case 40: // down
+						this.value -= increment;
+						event.preventDefault();
+						break;
+					case 33: // page up
+						this.normal += ALT_STEP;
+						event.preventDefault();
+						break;
+					case 34: // page down
+						this.normal -= ALT_STEP;
+						event.preventDefault();
+						break;
+				}
+			}
+		},
+		range: {
+			// update value with mouse.
+			// mousedown listener only applys to range, but once click temporarily adds
+			// move and up listeners to entire document, to avoid out-of-bounds issues
+			'mousedown': function ( event ) {
+				event.preventDefault();
+				
+				var self = this,
+					body = document.body,
+					range = this.range,
+					handle = this.handle,
+					bounds = range.getBoundingClientRect(),
+					marginX = handle.offsetWidth * 0.5,
+					marginY = handle.offsetHeight * 0.5;
+				
+				// calculate position based on mouse event
+				function getPosition ( evt ) {
+					if (evt.touches && evt.touches.length) {
+						evt = evt.touches[evt.touches.length - 1];
+					}
+					
+					var x = Math.min(Math.max(marginX, evt.clientX - bounds.left), bounds.width - marginX),
+						y = Math.min(Math.max(marginY, evt.clientY - bounds.top), bounds.height - marginY);
+					return [
+						(x - marginX) / (bounds.width - marginX*2),
+						(y - marginY) / (bounds.height - marginY*2)
+					];
+				}
+				
+				// mousemove handler
+				function move ( evt ) {
+					var position = getPosition(evt);
+					evt.preventDefault();
+					self.normal = (self.isVertical) ? (1.0 - position[1]) : position[0];
+				}
+				
+				// remove event listeners on mouseup
+				function end ( evt ) {
+					evt.preventDefault();
+					body.removeEventListener('mousemove', move);
+					body.removeEventListener('mouseup', end);
+					body.removeEventListener('touchmove', move);
+					body.removeEventListener('touchend', end);
+				}
+				
+				body.addEventListener('mousemove', move);
+				body.addEventListener('mouseup', end);
+				body.addEventListener('touchmove', move);
+				body.addEventListener('touchend', end);
+				
+				// which clicked remove focus if number input is active
+				// IE makes body activeElement when no input is focused
+				if ( 'activeElement' in document && (document.activeElement != document.body) ) {
+					document.activeElement.blur();
+				}
+				
+			}
+		}
+	};
+
+	// duplicate events for mobile and firefox support
+	Ctl.eventHandlers.range.touchstart = Ctl.eventHandlers.range.mousedown;
+	Ctl.eventHandlers.input.wheel = Ctl.eventHandlers.input.mousewheel;
+	Ctl.eventHandlers.range.wheel = Ctl.eventHandlers.input.mousewheel;
+	Ctl.eventHandlers.range.mousewheel = Ctl.eventHandlers.input.mousewheel;
+
+	// these are easing functions to map/unmap values to the 0-1 range
+	Ctl.warps = {
+		lin: {
+			map: function ( x ) {
+				var min = this.min,
+					max = this.max;
+				return (x <= 0) ? min 
+					 : (x >= 1) ? max
+					 : x * (max - min) + min;
+			},
+			unmap: function ( x ) {
+				var min = this.min,
+					max = this.max;
+				return (x <= min) ? 0
+					 : (x >= max) ? 1
+					 : (x - min) / (max - min);
+			}
+		},
+		exp: {
+			map: function ( x ) {
+				var min = this.min,
+					max = this.max,
+					logMin = Math.log(min),
+					logMax = Math.log(max);
+				return (x <= 0) ? min
+					 : (x >= 1) ? max
+					 : Math.exp(logMin + (logMax-logMin)*x);
+			},
+			unmap: function ( x ) {
+				var min = this.min,
+					max = this.max,
+					logMin = Math.log(min),
+					logMax = Math.log(max);
+				return (x <= min) ? 0
+					 : (x >= max) ? 1
+					 : (Math.log(x) - logMin) / (logMax - logMin);
+			}
+		},
+		// experimental
+		// TODO -- should this be bipolar?
+		quadIn: {
+			map: function ( x ) {
+				var min = this.min,
+					max = this.max;
+				return (x <= 0) ? min 
+					 : (x >= 1) ? max
+					 : (max-min) * x*x + min;
+			},
+			unmap: function ( x ) {
+				var min = this.min,
+					max = this.max;
+				return (x <= min) ? 0
+					 : (x >= max) ? 1
+					 : Math.sqrt(Math.abs(x - min) / (max - min));
+			}
+		},
+		// experimental
+		// TODO -- should this be bipolar?
+		quadOut: {
+			map: function ( x ) {
+				var min = this.min,
+					max = this.max,
+					onesubx = 1 - x;
+				return (x <= 0) ? min 
+					 : (x >= 1) ? max
+					 : (max-min) * (1 - onesubx*onesubx) + min;
+			},
+			unmap: function ( x ) {
+				var min = this.min,
+					max = this.max;
+					//sign = ((min < 0) && (x < 0.5)) ? -1 : 1;
+				return (x <= min) ? 0
+					 : (x >= max) ? 1
+					 : 1 - Math.sqrt(Math.abs(max - x) / (max - min));
+			}
+		}
+	};
+
+	// audio-centric presets for min/max values.  specify in options as 'spec'
+	// based off of SuperCollider3's ControlSpec
+	Ctl.specs = {
+		unipolar: { min: 0, max: 1, warp: 'lin', step: 0, value: 0 },
+		bipolar: { min: -1, max: 1, value: 0},
+		
+		bool: { min: 0, max: 1, warp: 'lin', step: 1, value: 0},
+		rotate: { min: -180, max: 180, warp: 'lin', step: 1, value: 0 },
+
+		freq: {min: 20, max: 20000, warp: 'exp', step: 0, value: 440},
+		lofreq: {min: 0.1, max: 100, warp: 'exp', step: 0, value: 6},
+		midfreq: {min: 25, max: 4200, warp: 'exp', step: 0, value: 440},
+		widefreq: {min: 0.1, max: 20000, warp: 'exp', step: 0, value: 440},
+		phase: {min: 0, max: 360},
+		rq: {min: 0.001, max: 2, warp: 'exp', step: 0, value: 0.707},
+		
+		midi: {min: 0, max: 127, step: 1, value: 64},
+		midinote: {min: 0, max: 127, step: 1, value: 60},
+		midivelocity: {min: 1, max: 127, value: 64},
+
+		amp: {min: 0, max: 1, warp: 'quadIn', step: 0, value: 0},
+		boostcut: {min: -20, max: 20, value: 0},
+
+		pan: {min: -1, max: 1, value: 0},
+		detune: {min: -20, max: 20, value: 0},
+		rate: {min: 0.125, max: 8, warp: 'exp', step: 0, value: 1},
+		beats: {min: 0, max: 20},
+		delay: {min: 0.0001, max: 1, warp: 'exp', step: 0, value: 0.3 },
+		
+		// 8bit
+		//'8bit': {min: -255, max: 255, warp: 'lin', step: 1, value 0 },
+		// 16bit values
+		integer: {min: -1024, max: 1024, warp: 'lin', step: 1, value: 0 },
+		float: {min: -1024, max: 1024, warp: 'lin', step: 0, value: 0 }
+	};
 	
 	/* ==== Export ==== */
 	
