@@ -44,11 +44,11 @@ Options
 ---------------------------------------		
 		var slider = new Ctl(el, options);
 		
-> *el* is any DOM Element.
->> If it's a HTMLInputElement it will be wrapped with the Ctl (it becomes `<input type="number" class="ctl-input" />`, and is the number display)/
->> Otherwise it will become the slider.
+*el* is any DOM Element.
+* If it's a HTMLInputElement it will be wrapped with the Ctl (it becomes `<input type="number" class="ctl-input" />`, the number part of the widget)
+* If it's a HTMLElement it will become the main container (`<tag class="ctl-box">...</tag>`).
 
-> *options* is an object with any of the following entries:
+*options* is an object with any of the following entries:
 * value: Number - initial value
 * min: Number - minimum value
 * max: Number - maximum value
