@@ -37,8 +37,8 @@ Usage
 		document.body.appendChild(slider.el);
 		
 If jQuery is included on the page then this class will add itself as a jQuery plugin:
-
-		$('input[type=range]').ctl(options);
+		// all range inputs will become Ctls. controls = array of Ctl
+		var controls = $('input[type=range]').ctl(options);
 		
 Options
 ---------------------------------------		
@@ -102,6 +102,9 @@ Changing values and event handling
 		// or listen based on DOM change events:
 		// slider.input is the input element
 		slider.input.addEventListener('change', listenerFunction);
+
+#### Experimental: ####
+Added single javascript file (ctl.singlefile.experimental.min.js) that includes all javascript code as well as the necessary CSS -- CSS is stored as string and will be dynamically added to <head> on page load.
 
 ##### Credits:
 This code is partly inspired by [SuperCollider3](https://github.com/supercollider/supercollider)'s EZSlider, and borrows it's name from Ron Kuivila's CV Quark.
