@@ -1,8 +1,6 @@
-/*** cross browser **/
-
 (function ( win, jQuery, module ) {
 	'use strict';
-
+	
 	/* ========= polyfills ======== */
 	var requestAnimFrame = (function(){
 			return  (typeof requestAnimationFrame !== 'undefined' && win.requestAnimationFrame) ||
@@ -19,7 +17,9 @@
 	 * usage: new Ctl(input or div element, options)
 	 * if specified el is a container then it is filled with the slider content
 	 * if specified el is an input element then it is wrapped with the slider
-	 * options may be:
+	 *
+	 * @param {HTMLElement} el - container or <input> element
+	 * @param {object} options - map of settings, see below for options
 	 * 
 	 * {
 	 *		label: text to display for slider name
@@ -40,8 +40,8 @@
 			// if called jQuery style (this is DOM element) re-call using expected format
 			return (this && this.nodeType === 1) ? new Ctl(this, el) : new Ctl(el, _options);
 		}
-		
-		var self = this,
+		var that = this,
+			// parse input arguments, create container/input elements
 			options = parseOptions(el, _options),
 			min = options.min,
 			max = options.max,
@@ -64,6 +64,8 @@
 			}
 		}
 		
+		// TODO add error for if max digits is greater than numCharacters
+		// (i.e. numCharacters = 3, max = 1000)
 		if ( !options.numCharacters ) {
 			options.numCharacters = Math.min(options.max.toFixed().length, 2);
 			// leave room for decimal and following digits
@@ -80,7 +82,12 @@
 		this.isVertical = (options.direction === 'vertical');
 		
 		// set up number display function (closure)
-		this.formatNumber = formatNumberMemoize(options.numCharacters, options.maxPrecision, !this.isVertical);
+		this.formatNumber = formatNumberMemoize({
+			numCharacters: options.numCharacters,
+			maxPrecision: options.maxPrecision,
+			showSign: (min < 0),
+			fixedWidth: !this.isVertical
+		});
 		
 		// set up DOM, adds references to dom elements to this
 		createDOM.call(this, options);
@@ -95,8 +102,8 @@
 					if ( input in Ctl.warps ) {
 						warp = input;
 						// bind this to instance
-						map = Ctl.warps[input].map.bind(self);
-						unmap = Ctl.warps[input].unmap.bind(self);
+						map = Ctl.warps[input].map.bind(that);
+						unmap = Ctl.warps[input].unmap.bind(that);
 					}
 				}
 			},
@@ -117,7 +124,7 @@
 					normal = unmap(value);
 					
 					if (old !== normal) {
-						self.update();
+						that.update();
 					}
 				}
 			},
@@ -136,7 +143,7 @@
 					normal = unmap(value);
 					
 					if ( old !== value ) {
-						self.update();
+						that.update();
 					}
 				}
 			},
@@ -152,15 +159,15 @@
 					if ( input > max ) {
 						min = max;
 						max = input;
-						self.input.max = max;
-						self.input.min = min;
+						that.input.max = max;
+						that.input.min = min;
 					} else {
 						min = input;
-						self.input.min = min;	
+						that.input.min = min;	
 					}
 					
 					// calls the setter for 'normal', which recalculates based on new min
-					self.normal = unmap(self.value);
+					that.normal = unmap(that.value);
 				}
 			},
 			max: {
@@ -175,15 +182,15 @@
 					if ( input < min ) {
 						max = min;
 						min = input;
-						self.input.min = min;
-						self.input.max = max;
+						that.input.min = min;
+						that.input.max = max;
 					} else {
 						max = input;
-						self.input.max = max;
+						that.input.max = max;
 					}
 					
 					// calls the setter for 'normal', which recalculates based on new max
-					self.normal = unmap(self.value);
+					that.normal = unmap(that.value);
 				}
 			},
 			// step determines the precision/quantization of value
@@ -197,10 +204,10 @@
 					// step can't be more than total range
 					step = Math.max(Math.min(0, input), max - min);
 					// update DOM
-					self.input.step = step;
+					that.input.step = step;
 					
 					// calls the setter for 'value', which re-rounds value based on new step
-					self.value = map(self.normal);
+					that.value = map(that.normal);
 				}
 			},
 			// listeners hold subscribed callbacks to change events
@@ -222,15 +229,15 @@
 	 *
 	 */
 	Ctl.prototype.update = function () {
-		var self = this,
+		var that = this,
 			value = this.value,
 			listeners = this.listeners;
 		
 		if ( this.input.value !== value ) this.input.value = value;
 		// defer UI updates for optimal performance
 		requestAnimFrame(function() {
-			self.number.textContent = self.formatNumber(value);
-			self.render();
+			that.number.textContent = that.formatNumber(value);
+			that.render();
 		});
 		
 		// run any event listeners
@@ -246,12 +253,21 @@
 		
 	};
 	
-	// add a listener to when the value changes.  fn(value, normalizedValue)
+	/**
+	 * add a listener to when the value changes.  fn(value, normalizedValue)
+	 * 
+	 * @param {function} fn - called on change event with arguments:
+	 *		value: {number} actual value of Ctl
+	 *		normalizedValue: {number} value mapped to 0..1 range
+	 */
 	Ctl.prototype.bind = function ( fn ) {
 		this.listeners.push(fn);
 	};
 
-	// remove listener
+	/**
+	 * remove listener
+	 * @param {function} fn - previously bound callback function
+	 */
 	Ctl.prototype.unbind = function ( fn ) {
 		var i = this.listeners.indexOf(fn);
 		if (i > -1) this.listeners.splice(i, 1);
@@ -262,9 +278,9 @@
 	/**
 	 * parse the input options, DOM attributes and include default options
 	 *
-	 * @param el (OPTIONAL) - DOM input or container element
-	 * @param _options (OPTIONAL) - extra configuration object
-	 * @returns options object
+	 * @param {HTMLElement} el - DOM input or container element (OPTIONAL)
+	 * @param {options} _options - extra configuration object (OPTIONAL)
+	 * @returns {object} options compiled options (w/ input+container elements)
 	 */
 	function parseOptions ( el, _options ) {
 		var containerElement, inputElement, elementAttributes, options, spec;
@@ -344,11 +360,11 @@
 	 * create dom elements, set attributes, add event handlers
 	 * node: called by Ctl, so this references Ctl
 	 *
-	 * @param options (REQUIRED) settings created from parseoptions above
+	 * @param {object} options settings created from parseoptions above (REQUIRED)
 	 */
 	// TODO: should these constants (cssPrefix, etc) be set at top of file?
 	function createDOM ( options ) {
-		var self = this,
+		var that = this,
 			container = options.container,
 			input = options.input,
 			theme = options.theme || '',
@@ -358,7 +374,6 @@
 			innerClasses = ['meter','handle','label','range','number'],
 			directionClass = (this.isVertical ? 'vertical' : 'horizontal'),
 			numberWidth = (options.numCharacters + 3) + 'ex';
-			
 		
 		// set up container element
 		toggleClass(container, cssPrefix + outerClass, true);
@@ -393,7 +408,7 @@
 			var div = document.createElement('div');
 			toggleClass(div, cssPrefix + className, true);
 			container.appendChild(div);
-			self[className] = div;
+			that[className] = div;
 		});
 		
 		this.number.textContent = this.formatNumber(options.value);
@@ -403,12 +418,12 @@
 		
 		// add event listeners to elements.  see Ctl.eventHandlers
 		Object.keys(Ctl.eventHandlers).forEach(function ( elementKey ) {
-			var element = self[elementKey],
+			var element = that[elementKey],
 				elementEvents = Ctl.eventHandlers[elementKey];
 			
-			// bind handler context to this (self)
+			// bind handler context to this (that)
 			Object.keys(elementEvents).forEach(function ( eventName ) {
-				element.addEventListener(eventName, elementEvents[eventName].bind(self));
+				element.addEventListener(eventName, elementEvents[eventName].bind(that));
 			});
 		});
 		
@@ -438,7 +453,15 @@
 		
 	}
 
-	// helper function to trigger a DOM event, even in IE
+	/**
+	 * helper function to trigger a DOM event, even in IE
+	 *
+	 * rather than do IE check each time it's called, detect once
+	 * and return appropriate function
+	 *
+	 * @param {string} name - event name
+	 * @param {HTMLElement} target - DOM element that initiates event
+	 */
 	var dispatchEvent = (function () {
 		if ( document.createEvent ) {
 			return function ( name, target ) {
@@ -454,7 +477,13 @@
 		}
 	})();
 	
-	// helper function to toggle classes, since IE 9 doesn't support classList
+	/**
+	 * helper function to toggle classes, since IE 9 doesn't support classList
+	 *
+	 * @param {HTMLElement} el - target element
+	 * @param {string} className - class to add/remove
+	 * @param {boolean} toggleOn - if true add class, otherwise remove
+	 */
 	function toggleClass ( el, className, toggleOn ) {
 		var str = el.className,
 			re = new RegExp('\\s+\\b' + className.toString() + '\\b');
@@ -465,25 +494,33 @@
 			el.className = str.replace(re, '');
 		}
 	}
-
+	
 	/**
 	 * create optimized formatting function to properly align numbers
 	 * closure determines constant values for function
 	 *
-	 * @param _numCharacters - number of characters available
-	 * @param _maxPrecision - maximum number of digits after decimal point
-	 * @param isFixedWidth - whether to allow whitespace to collapse
-	 * @returns function(value) - formats according to given settings
+	 * @param {object} options:
+	 * 		: {number} _numCharacters - number of characters available
+	 * 		: {number} _maxPrecision - maximum number of digits after decimal point
+	 * 		: {boolean} showSign - whether to leave room for sign
+	 * 		: {boolean} isFixedWidth - whether to allow whitespace to collapse
+	 * @returns {function} function(value) - converts number to string accordingly
 	 */
-	function formatNumberMemoize ( _numCharacters, _maxPrecision, isFixedWidth ) {	
-		var maxPrecision = (_maxPrecision != null) ? _maxPrecision : 3,
-			numCharacters = Math.max(_numCharacters || 8, 2),
+	// TODO does options retain in memory for closure? does it need optimizing?
+	function formatNumberMemoize (options) {	
+	 	var MIN_CHARS = 3,
+			DEFAULT_CHARS = 8, // if numchars isn't defined
+			maxPrecision = options.maxPrecision,
+			showSign = options.showSign,
+			numCharacters = Math.max(options.numCharacters || DEFAULT_CHARS, MIN_CHARS),
+			// regex pattern to split up input number
+			pattern = /(-)?(\d+)(\.)?(\d+)?/,
 			// en-space (fixed-width) or regular space
-			sp = (isFixedWidth) ? '\u2002' : ' ',
+			sp = (options.isFixedWidth) ? '\u2002' : ' ',
 			paddingString = '';
 		
-		// leave room for decimal point
-		if ( maxPrecision ) numCharacters -= 1;
+		// leave room for sign
+		if ( showSign ) numCharacters -= 1;
 		
 		// create padding string of proper size
 		while ( paddingString.length < numCharacters )
@@ -491,29 +528,22 @@
 		
 		// closure holds constant values for performance
 		return function ( value ) {
-			var sign = (value < 0) ? '-' : sp,
-				absVal = Math.abs(value),
-				places = 0,
-				precision;
+				// split number into parts, i.e. -4039.832 becomes [ - , 4039 , . , 832 ]
+			var parts = value.toFixed(maxPrecision).match(pattern),
+				// add '-' or space if needed
+				sign = showSign ? (parts[1] || sp) : '',
+				// number of digits before decimal point
+				places = parts[2].length,
+				// number of digits to keep after decimal point
+				// - 1 is because we'll always need a decimal point if maxPrecision > 0
+				precision = Math.max(0, Math.min(numCharacters - places - 1, maxPrecision)),
+				// if fractional part then make room for decimal
+				decimal = (precision) ? 1 : 0;
 			
-			// ensure room for zero if less than 1
-			if ( absVal < 1 ) {
-				places = 1;
-			} else {
-				// find num digits before decimal point
-				while( absVal >= 1 ) {
-					absVal /= 10;
-					places += 1;
-				}
-			}
+			return  sign +
+					paddingString.slice(places + precision + decimal) +
+					Math.abs(value).toFixed(precision);
 			
-			// find available room for digits after decimal point
-			precision = Math.min( Math.max(numCharacters - places, 0), maxPrecision );
-			
-			// sign, whitespace, number
-			return sign +
-				   paddingString.slice(places + precision) +
-				   Math.abs(value).toFixed(precision);
 		};
 	}
 
@@ -564,6 +594,9 @@
 		}
 	}
 
+	/**
+	 * same as renderHorizontal, except vertical.  obviously.
+	 */
 	function renderVertical () {
 		var normal = this.normal,
 			rangeHeight = this.range.clientHeight,
@@ -609,7 +642,7 @@
 		alt_key_step: 1 / 20, // amount to jump when alt key is pressed in increment handling
 		shift_key_step: 10 // jump 10X the step amount when shift pressed in increment handling
 	};
-
+	
 	// protected - allows monkey-patching, but doesn't need to be used outside of instance creation
 	Ctl.eventHandlers = {
 		input: {
@@ -686,7 +719,7 @@
 			'mousedown': function ( event ) {
 				event.preventDefault();
 				
-				var self = this,
+				var that = this,
 					body = document.body,
 					range = this.range,
 					handle = this.handle,
@@ -712,7 +745,7 @@
 				function move ( evt ) {
 					var position = getPosition(evt);
 					evt.preventDefault();
-					self.normal = (self.isVertical) ? (1.0 - position[1]) : position[0];
+					that.normal = (that.isVertical) ? (1.0 - position[1]) : position[0];
 				}
 				
 				// remove event listeners on mouseup
@@ -747,6 +780,7 @@
 
 	// these are easing functions to map/unmap values to the 0-1 range
 	Ctl.warps = {
+		// linear
 		lin: {
 			map: function ( x ) {
 				var min = this.min,
@@ -763,6 +797,7 @@
 					 : (x - min) / (max - min);
 			}
 		},
+		// exponential warping
 		exp: {
 			map: function ( x ) {
 				var min = this.min,
@@ -866,9 +901,22 @@
 		jQuery.fn.ctl = function ( options ) {
 			// skip anything that's (probably) already been created
 			// TODO - should css prefix / names be a global constant?
-			return this.not('.ctl-box, .ctl-input').map(function () {
+			var results = this.not('.ctl-box, .ctl-input').map(function () {
 				return new Ctl(this, options);
 			});
+			
+			// return non-jQuery results
+			// TODO - is this what developers would expect?
+			//   I would think that since what's returned isn't DOM elements
+			//   then vanilla content (null, single Ctl or array) is best
+			//   I welcome any comments otherwise
+			if ( !results.length ) {
+				return null;
+			} else if ( results.length === 1 ) {
+				return results[0];
+			} else {
+				return results.toArray();
+			}
 		};
 	}
 	
@@ -879,6 +927,6 @@
 	}
 	
 })(this,									// window
-  (typeof jQuery == 'object') && jQuery,	// jQuery
+  (typeof jQuery !== 'undefined') && jQuery,	// jQuery
   (typeof module == 'object') && module		// CommonJS support
 );
