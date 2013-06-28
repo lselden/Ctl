@@ -14,6 +14,9 @@ It's imminently customizable via CSS -- I've included a couple of different 'the
 
 Check out a live demo [here](http://lukeselden.com/projects/ctl/index.html).
 
+### Tests ###
+Mocha tests included [here] (http://lselden.github.io/Ctl/test/index.html).
+
 Usage
 ---------------------------------------		
 		
@@ -100,10 +103,13 @@ Changing values and event handling
 		// slider.input is the input element
 		slider.input.addEventListener('change', listenerFunction);
 
-##### Credits:
-This code is partly inspired by [SuperCollider3](https://github.com/supercollider/supercollider)'s EZSlider, and borrows it's name from Ron Kuivila's CV Quark.
+##### References:
+This code is partly inspired by [SuperCollider3 (SC3)](https://github.com/supercollider/supercollider)'s EZSlider, Kuivila's SC3 CV Quark.
+
 Spec presets are lifted from SC3's (ControlSpec)[https://github.com/supercollider/supercollider/blob/cfef1d3598425d25badf197f96b41b4c664c9849/SCClassLibrary/Common/GUI/ControlModel.sc]
+
 'flat' theme emulates (FlatUI)[http://designmodo.github.io/Flat-UI/]
+
 'dat' theme emulates (datgui)[https://code.google.com/p/dat-gui/]
 
 _2013 Luke Selden_
