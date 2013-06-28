@@ -104,7 +104,8 @@ Changing values and event handling
 		slider.input.addEventListener('change', listenerFunction);
 
 #### Experimental: ####
-Added single javascript file (ctl.singlefile.experimental.min.js) that includes all javascript code as well as the necessary CSS -- CSS is stored as string and will be dynamically added to <head> on page load.
+Added single javascript file (ctl.singlefile.experimental.min.js) that includes all javascript code as well as the necessary CSS.
+CSS is stored as string and will be dynamically added to <head> on page load.
 
 ##### Credits:
 This code is partly inspired by [SuperCollider3](https://github.com/supercollider/supercollider)'s EZSlider, and borrows it's name from Ron Kuivila's CV Quark.
