@@ -10,9 +10,12 @@ It has no dependancies, and should work on any modern browser that supports CSS3
 It's imminently customizable via CSS -- I've included a couple of different 'themes' as a separate CSS file.
 
 
-### [Demo] (http://lukeselden.com/projects/ctl/index.html)
+### Demo ###
 
 Check out a live demo [here](http://lukeselden.com/projects/ctl/index.html).
+
+### Tests ###
+Mocha tests included [here] (http://lselden.github.io/Ctl/test/index.html).
 
 Usage
 ---------------------------------------		
