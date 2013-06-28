@@ -105,6 +105,8 @@ ul.vertical li {
 		</fieldset>
 		<p>See <a href="http://github.com/lselden/CVSlider">GitHub</a> for more information</p>
 		<script>
+			'use strict';
+			
 			/** take all inputs defined above and convert them to Ctls.  options will automatically be populated from element attributes **/
 			
 			var sliders = [];
@@ -113,9 +115,9 @@ ul.vertical li {
 			// IE 9 automatically converts inputs to type=text
 			//var nodes = document.querySelectorAll('input[type=range], input[type=number]:not(.cv-input)');
 			var nodes = document.querySelectorAll('input:not(.ctl-input)');
-			for (var i=0, input; input = nodes[i]; i++) {
+			for (var i=0, slide, input; input = nodes[i]; i++) {
 				
-				var slide = new Ctl(input);
+				slide = new Ctl(input);
 				
 				//slide.el.style.display = 'inline-block';
 				

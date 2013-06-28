@@ -4,6 +4,7 @@
     <title>Mocha</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
     <link rel="stylesheet" href="mocha.css" />
     <link rel="stylesheet" href="../ctl.css" />
     <link rel="stylesheet" href="../ctlthemes.css" />
@@ -11,7 +12,20 @@
 		#content {
 			padding: 2rem;
 			max-height: 50%;
+			margin-top: 2rem;
 		}
+		
+		.test-class-selector {
+			width: 100px;
+			height: 400px;
+			display: inline-block;
+		}
+		
+		.pre-with-columns {
+			-webkit-column-width: 40ex;
+			width: 240ex;
+		}
+		
 	</style>
   </head>
   <body>
@@ -32,6 +46,7 @@
 	<script src="../ctl.js"></script>
     <script src="tests.js"></script>
     <script>
+		mocha.checkLeaks();
       mocha.run();
     </script>
   </body>
